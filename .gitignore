@@ -1,36 +1,229 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# ============================================
+# Python (FastAPI, PyTorch)
+# ============================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# C extensions
+*.so
 
-# testing
-/coverage
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# next.js
-/.next/
-/out/
+# PyInstaller
+*.manifest
+*.spec
 
-# production
-/build
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
 
-# misc
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PyTorch
+*.pth
+*.pt
+*.bin
+*.onnx
+
+# ============================================
+# Node.js / Next.js
+# ============================================
+# Dependencies
+node_modules/
+.next/
+.yarn/
+
+# Testing
+coverage/
+
+# Production
+build/
+.next/
+
+# Misc
 .DS_Store
 *.pem
 
-# debug
+# Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
+# Local env files
 .env*.local
 .env
 
-# vercel
+# Vercel
 .vercel
 
-# typescript
+# Typescript
 *.tsbuildinfo
-next-env.d.ts
+
+# ============================================
+# PostgreSQL
+# ============================================
+# Database files
+*.db
+*.sqlite3
+*.db-journal
+postgres_data/
+postgresql_data/
+data/
+pgdata/
+
+# Backup files
+*.dump
+*.bak
+*.backup
+
+# ============================================
+# Nginx
+# ============================================
+# Logs
+*.log
+nginx/access.log
+nginx/error.log
+logs/
+
+# Cache
+nginx/cache/
+
+# ============================================
+# Krakend
+# ============================================
+# Krakend configs (if generated)
+krakend/generated/
+krakend/*.out
+
+# ============================================
+# Docker
+# ============================================
+# Docker Compose
+docker-compose.override.yml
+
+# ============================================
+# IDE
+# ============================================
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# PyCharm
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Vim
+*.swp
+*.swo
+
+# ============================================
+# OS generated files
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ============================================
+# Environment variables
+# ============================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.backup
+
+# ============================================
+# Logs
+# ============================================
+*.log
+logs/
+nginx/logs/
+
+# ============================================
+# Temporary files
+# ============================================
+*.tmp
+*.temp
+temp/
+
+# ============================================
+# Project specific
+# ============================================
+# ML models (large files)
+models/
+!models/README.md
+
+# Training data
+data/raw/
+data/processed/
+data/external/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# MLflow
+mlruns/
+
+# Weights & Biases
+wandb/
+
+# Docker secrets
+*.secret
+*.key
+*.crt
+*.pem

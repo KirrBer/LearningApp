@@ -23,7 +23,7 @@ export const Header = () => {
                 <Link href={"/courses"} className="hidden lg:block hover:text-blue-600 transition-colors">База курсов</Link>
                 <Link href={"/jobs"} className="hidden lg:block hover:text-blue-600 transition-colors">Вакансии</Link>
                 <Link href={"/learning_path_generator"} className="hidden lg:block hover:text-blue-600 transition-colors">Генератор путей</Link>
-                <Link href={"/skills_analyzer"} className="hidden lg:block hover:text-blue-600 transition-colors">Анализ скилов</Link>
+                <Link href={"/skill_analyzer"} className="hidden lg:block hover:text-blue-600 transition-colors">Анализ скилов</Link>
                 <Link href={"/profile"} className="hidden lg:block hover:text-blue-600 transition-colors">Профиль</Link>
                 <Image onClick={handleClick} src={menu} alt='menu' width={40} height={40} className="block lg:hidden h-10 w-10 cursor-pointer"></Image>
                 {

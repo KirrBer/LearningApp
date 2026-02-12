@@ -4,7 +4,7 @@ import pickle
 import spacy
 import json
 
-router = APIRouter(prefix='/skill_analyzer')
+router = APIRouter()
                    
 @router.post("/", summary="Получить список навыков")
 async def get_skills(data=Body()):

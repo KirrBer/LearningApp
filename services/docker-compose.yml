@@ -9,20 +9,22 @@ services:
     networks:
       - default
   nextjs:
-    build: /frontend
+    build: ./frontend
     ports:
       - "3000:3000"
     restart: unless-stopped
     networks:
       - default
   skill_analyzer:
-    build: /skill_analyzer
+    build: ./skill_analyzer
+    depends_on: 
+      - skill_analyzer_db
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
       PGDATA: ${PGDATA}
-      DB_PORT: 5432
+      DB_PORT: ${DB_PORT}
       DB_HOST: ${DB_HOST}
     ports: 
       - "8000:8000"
@@ -37,6 +39,7 @@ services:
       PGDATA: ${PGDATA}
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./skill_analyzer/init-scripts:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     restart: unless-stopped

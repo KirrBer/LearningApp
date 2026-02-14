@@ -6,3 +6,7 @@ asyncpg==0.29.0
 uvicorn==0.40.0
 spacy==3.8.11
 fastapi==0.128.0
+tiktoken==0.12.0
+sentencepiece==0.2.1
+transformers==5.1.0
+protobuf==3.20.3

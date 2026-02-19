@@ -1,26 +1,19 @@
 from fastapi import APIRouter, Body
 from db import async_session_maker
-import pickle
-import spacy
-import json
+from dao import SkillDAO
+from utils import extract_skills
+
 
 router = APIRouter()
-                   
+
 @router.post("/", summary="Получить список навыков")
 async def get_skills(data=Body()):
-    with open("data", "rb") as file:
-        all_skills = pickle.load(file)
-    nlp = spacy.load("./model/model-best")
-    doc = nlp(data['text'])
-    possible_skills = set()
-    for ent in doc.ents:
-        item = ent.text
-        if "\n" in item:
-            item = item.replace("\n", " ")
-        possible_skills.add(item)
-    skills = set()
-    for skill in possible_skills:
-        if skill.lower() in all_skills:
-            skills.add(skill)
-    skills = list(skills)
-    return json.dumps({"message": skills})
+    skills = extract_skills(data['text'])
+    response = []
+    for skill in skills:
+        found = SkillDAO.find_skill(skill)
+        if found:
+            response.append(found[0])
+        else:
+            response.append({"name": skill, "course": None})
+    return response

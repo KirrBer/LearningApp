@@ -5,7 +5,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 from db import Base, DATABASE_URL
-from models import Skill, Synonym
+from models import Skill
 
 config = context.config
 config.set_main_option("sqlalchemy.url", DATABASE_URL)

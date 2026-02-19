@@ -7,7 +7,3 @@ class Skill(Base):
     name: Mapped[str_uniq]
     course: Mapped[str]
 
-class Synonym(Base):
-    id: Mapped[int_pk]
-    name: Mapped[str_uniq]
-    skill_id: Mapped[int] = mapped_column(ForeignKey("skills.id"), nullable=False)

@@ -3,8 +3,9 @@
 import { useState } from 'react';
 
 export default function SkillForm() {
+  interface Skill { name: string; course: string; }
   const [resume, setResume] = useState('');
-  const [skills, setSkills] = useState<Array<string>>([]);
+  const [skills, setSkills] = useState<Array<Skill>>([]);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,9 +19,7 @@ export default function SkillForm() {
       });
     
       const data = await res.json();
-      const jsn = JSON.parse(data)
-      setSkills(jsn.message || []);
-      console.log(skills)
+      setSkills(data || []);
       
     
     } catch (error) {
@@ -53,14 +52,24 @@ export default function SkillForm() {
         <div className="mt-6">
           <h3 className="text-lg font-semibold mb-3">Навыки:</h3>
           <div className="flex flex-wrap gap-2">
-            {skills.map((skill, i) => (
-              <span
+            {skills.map((skill, i) => 
+            skill.course ? (
+              <a
                 key={i}
-                className="bg-gray-100 px-3 py-1 rounded-full text-sm"
+                className="bg-red-300 px-3 py-1 rounded-full text-sm"
+                href={skill.course}
               >
-                {skill}
-              </span>
-            ))}
+                {skill.name}
+              </a>
+            ) : (
+            <span
+              key={i}
+              className="bg-gray-100 px-3 py-1 rounded-full text-sm"
+            >
+              {skill.name}
+            </span>
+            )
+          )}
           </div>
         </div>
       )}

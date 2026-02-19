@@ -4,7 +4,7 @@ from transformers import T5ForConditionalGeneration, T5Tokenizer
 from torch import no_grad
 
 def extract_skills(resume):
-    with open("data", "rb") as file:
+    with open("hhru_skills", "rb") as file:
         hhru_skills = pickle.load(file)
     nlp = spacy.load("./extractor_model/model-best")
     doc = nlp(resume)

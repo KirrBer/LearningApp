@@ -11,9 +11,9 @@ async def get_skills(data=Body()):
     skills = extract_skills(data['text'])
     response = []
     for skill in skills:
-        found = SkillDAO.find_skill(skill)
+        found = await SkillDAO.find_skill(skill)
         if found:
-            response.append(found[0])
+            response.append(found)
         else:
             response.append({"name": skill, "course": None})
     return response

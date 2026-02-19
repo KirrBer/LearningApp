@@ -4,24 +4,29 @@ import { useState } from 'react';
 
 export default function SkillForm() {
   const [resume, setResume] = useState('');
-  const [skills, setSkills] = useState<string[]>([]);
+  const [skills, setSkills] = useState<Array<string>>([]);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
     try {
       const res = await fetch('/api/skill_analyzer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({text: resume })
-      }).then(response => response.json()).then(skills => setSkills(skills.message));
+        body: JSON.stringify({ text: resume })
+      });
+    
+      const data = await res.json();
+      const jsn = JSON.parse(data)
+      setSkills(jsn.message || []);
+      console.log(skills)
+      
+    
     } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+        console.error('Error:', error);
+      }
+    setLoading(false);
   };
 
   return (
@@ -44,7 +49,7 @@ export default function SkillForm() {
         </button>
       </form>
 
-      {skills.length > 0 && (
+      {skills?.length > 0 && (
         <div className="mt-6">
           <h3 className="text-lg font-semibold mb-3">Навыки:</h3>
           <div className="flex flex-wrap gap-2">

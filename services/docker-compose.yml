@@ -4,19 +4,21 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx.conf:/etc/nginx/nginx.conf
     restart: unless-stopped
     networks:
       - default
   nextjs:
-    build: /frontend
+    build: ./frontend
     ports:
       - "3000:3000"
     restart: unless-stopped
     networks:
       - default
   skill_analyzer:
-    build: /skill_analyzer
+    build: ./skill_analyzer
+    depends_on: 
+      - skill_analyzer_db
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -37,14 +39,10 @@ services:
       PGDATA: ${PGDATA}
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./skill_analyzer/init-scripts:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U test"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
     networks:
       - default
 volumes:

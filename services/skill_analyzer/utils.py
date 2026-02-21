@@ -1,12 +1,11 @@
 import pickle
-import spacy
-from transformers import T5ForConditionalGeneration, T5Tokenizer
 from torch import no_grad
+from model_manager import model_manager
 
 def extract_skills(resume):
     with open("hhru_skills", "rb") as file:
         hhru_skills = pickle.load(file)
-    nlp = spacy.load("./extractor_model/model-best")
+    nlp = model_manager.get_extractor_model()
     doc = nlp(resume)
     extracted_skills = set()
     for ent in doc.ents:
@@ -23,10 +22,8 @@ def extract_skills(resume):
         with no_grad():
             hypotheses = model.generate(**inputs, **kwargs)
         return tokenizer.decode(hypotheses[0], skip_special_tokens=True)
-    model = T5ForConditionalGeneration.from_pretrained("cointegrated/rut5-small")
-    tokenizer = T5Tokenizer.from_pretrained("cointegrated/rut5-small")
-    model = model.from_pretrained("./normalize_model")
-    tokenizer = tokenizer.from_pretrained("./normalize_model")
+    model = model_manager.get_normalize_model()
+    tokenizer = model_manager.get_tokenizer()
     model.eval()
     cleared_skills = list(cleared_skills)
     normalized_skills = list(set([answer(skill) for skill in cleared_skills]))

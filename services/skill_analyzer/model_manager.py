@@ -20,10 +20,9 @@ class ModelManager:
         if self._extractor_model is None:
             self._extractor_model = spacy.load("./extractor_model/model-best")
             logger.info("✅ Extractor model loaded!")
-            self._normalize_model = T5ForConditionalGeneration.from_pretrained("cointegrated/rut5-small")
-            self._tokenizer = T5Tokenizer.from_pretrained("cointegrated/rut5-small")
-            self._normalize_model = self._normalize_model.from_pretrained("./normalize_model")
-            self._tokenizer = self._tokenizer.from_pretrained("./normalize_model")
+            self._normalize_model = T5ForConditionalGeneration.from_pretrained("./normalize_model")
+            self._tokenizer = T5Tokenizer.from_pretrained("./normalize_model")
+            self._normalize_model.eval()
             logger.info("✅ Normalize model loaded!")
     
     def get_extractor_model(self):

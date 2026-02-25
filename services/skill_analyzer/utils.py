@@ -26,7 +26,7 @@ def extract_skills(resume):
     tokenizer = model_manager.get_tokenizer()
     model.eval()
     cleared_skills = list(cleared_skills)
-    normalized_skills = list(set([answer(skill) for skill in cleared_skills]))
+    normalized_skills = list(set([answer("normalize skill: "+skill) for skill in cleared_skills]))
     cleared_normalized_skills = set()
     for skill in normalized_skills:
         if skill.lower() in hhru_skills:

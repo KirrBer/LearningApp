@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Body
-from db import async_session_maker
-from dao import SkillDAO
+from db_methods import find_skills
 from utils import extract_skills
 
 
@@ -10,10 +9,11 @@ router = APIRouter()
 async def get_skills(data=Body()):
     skills = extract_skills(data['text'])
     response = []
+    found_skills = await find_skills(skills)
+    found_skills_dict = {Skill.name: Skill.course for Skill in found_skills}
     for skill in skills:
-        found = SkillDAO.find_skill(skill)
-        if found:
-            response.append(found[0])
+        if skill in list(found_skills_dict.keys()):
+            response.insert(0, {"name": skill, "course": found_skills_dict[skill]})
         else:
             response.append({"name": skill, "course": None})
     return response

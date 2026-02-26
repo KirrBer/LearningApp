@@ -39,7 +39,6 @@ services:
       PGDATA: ${PGDATA}
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./skill_analyzer/init-scripts:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     restart: unless-stopped

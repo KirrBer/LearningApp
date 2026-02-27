@@ -9,6 +9,12 @@ export default function SkillForm() {
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -29,26 +35,23 @@ export default function SkillForm() {
       }
     } else if (file){
       const formData = new FormData();
-      formData.append('pdf', file);
+      formData.append('file', file);
 
       try {
         const response = await fetch('/api/skill_analyzer/file', {
           method: 'POST',
           body: formData,
         });
-
+        const data = await response.json();
+        setSkills(data || []);
         setFile(null);
         // Очищаем input
         const fileInput = document.getElementById('pdf-upload') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
-        const data = await response.json();
-        setSkills(data || []);
       } catch (error) {
         console.error('Error:', error);
       }
-    } else{
-
-    }
+    } 
     setLoading(false);
   }
   
@@ -62,12 +65,12 @@ export default function SkillForm() {
           onChange={(e) => setResume(e.target.value)}
           placeholder="Вставьте текст резюме..."
           className="w-full h-64 p-4 border rounded-lg focus:ring-2 focus:ring-blue-500"
-          required
         />
         <input
         id="pdf-upload"
         accept=".pdf"
         type="file"
+        onChange={handleFileChange}
         className="block w-full mb-4 text-sm text-gray-500
           file:mr-4 file:py-2 file:px-4
           file:rounded-full file:border-0
@@ -76,7 +79,7 @@ export default function SkillForm() {
           hover:file:bg-blue-100"
         />
         {file && (
-        <p className="mb-4 text-sm text-gray-600">
+        <p className="mt-4 text-sm text-gray-600">
           Выбран: {file.name}
         </p>
         )}
@@ -88,7 +91,7 @@ export default function SkillForm() {
           {loading ? 'Извлечение...' : 'Извлечь навыки'}
         </button>
       </form>
-      {file && resume && (
+      {!file && !resume && (
         <p className="mb-4 text-sm text-gray-600">
           Пожалуйста прикрепите файл или введите текст резюме
         </p>

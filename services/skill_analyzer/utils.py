@@ -1,6 +1,8 @@
 import pickle
 from torch import no_grad
 from model_manager import model_manager
+from pdftext.extraction import plain_text_output
+import io
 
 def extract_skills(resume):
     with open("hhru_skills", "rb") as file:
@@ -32,3 +34,13 @@ def extract_skills(resume):
         if skill.lower() in hhru_skills:
             cleared_normalized_skills.add(skill)
     return list(cleared_normalized_skills)
+
+async def extract_text(file):
+    contents = await file.read()
+    
+    text = plain_text_output(
+        io.BytesIO(contents),
+        sort=True,
+        hyphens=False
+    )
+    return text

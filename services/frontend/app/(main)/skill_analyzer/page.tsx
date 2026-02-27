@@ -20,7 +20,7 @@ export default function SkillForm() {
     setLoading(true);
     if (resume){
       try {
-      const response = await fetch('/api/skill_analyzer', {
+      const response = await fetch('/api/skill_analyzer/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: resume })

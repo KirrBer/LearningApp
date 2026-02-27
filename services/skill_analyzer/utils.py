@@ -15,10 +15,10 @@ def extract_skills(resume):
         if "\n" in item:
             item = item.replace("\n", " ")
         extracted_skills.add(item)
-    cleared_skills = set()
-    for skill in extracted_skills:
-        if skill.lower() in hhru_skills:
-            cleared_skills.add(skill)
+    cleared_skills = set(extracted_skills)
+    # for skill in extracted_skills:
+    #     if skill.lower() in hhru_skills:
+    #         cleared_skills.add(skill)
     def answer(x, **kwargs):
         inputs = tokenizer(x, return_tensors='pt').to(model.device)
         with no_grad():

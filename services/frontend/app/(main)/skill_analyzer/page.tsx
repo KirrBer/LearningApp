@@ -4,29 +4,55 @@ import { useState } from 'react';
 
 export default function SkillForm() {
   interface Skill { name: string; course: string; }
-  const [resume, setResume] = useState('');
+  const [resume, setResume] = useState<string>('');
   const [skills, setSkills] = useState<Array<Skill>>([]);
   const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      const res = await fetch('/api/skill_analyzer', {
+    if (resume){
+      try {
+      const response = await fetch('/api/skill_analyzer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: resume })
       });
     
-      const data = await res.json();
+      const data = await response.json();
       setSkills(data || []);
       
     
-    } catch (error) {
+      } catch (error) {
         console.error('Error:', error);
       }
+    } else if (file){
+      const formData = new FormData();
+      formData.append('pdf', file);
+
+      try {
+        const response = await fetch('/api/skill_analyzer/file', {
+          method: 'POST',
+          body: formData,
+        });
+
+        setFile(null);
+        // Очищаем input
+        const fileInput = document.getElementById('pdf-upload') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+        const data = await response.json();
+        setSkills(data || []);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    } else{
+
+    }
     setLoading(false);
-  };
+  }
+  
+    
 
   return (
     <div className="max-w-2xl mx-auto p-6">
@@ -38,7 +64,22 @@ export default function SkillForm() {
           className="w-full h-64 p-4 border rounded-lg focus:ring-2 focus:ring-blue-500"
           required
         />
-        
+        <input
+        id="pdf-upload"
+        accept=".pdf"
+        type="file"
+        className="block w-full mb-4 text-sm text-gray-500
+          file:mr-4 file:py-2 file:px-4
+          file:rounded-full file:border-0
+          file:text-sm file:font-semibold
+          file:bg-blue-50 file:text-blue-700
+          hover:file:bg-blue-100"
+        />
+        {file && (
+        <p className="mb-4 text-sm text-gray-600">
+          Выбран: {file.name}
+        </p>
+        )}
         <button
           type="submit"
           disabled={loading}
@@ -47,6 +88,11 @@ export default function SkillForm() {
           {loading ? 'Извлечение...' : 'Извлечь навыки'}
         </button>
       </form>
+      {file && resume && (
+        <p className="mb-4 text-sm text-gray-600">
+          Пожалуйста прикрепите файл или введите текст резюме
+        </p>
+      )}
 
       {skills?.length > 0 && (
         <div className="mt-6">

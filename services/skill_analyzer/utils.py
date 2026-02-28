@@ -27,11 +27,11 @@ def extract_skills_from_text(resume):
     model.eval()
     cleared_skills = list(cleared_skills)
     normalized_skills = list(set([answer("normalize skill: "+skill) for skill in cleared_skills]))
-    cleared_normalized_skills = set()
-    for skill in normalized_skills:
-        if skill.lower() in hhru_skills:
-            cleared_normalized_skills.add(skill)
-    return list(cleared_normalized_skills)
+    # cleared_normalized_skills = set()
+    # for skill in normalized_skills:
+    #     if skill.lower() in hhru_skills:
+    #         cleared_normalized_skills.add(skill)
+    return normalized_skills
 
 async def extract_skills_from_pdf(file):
     contents = await file.read()

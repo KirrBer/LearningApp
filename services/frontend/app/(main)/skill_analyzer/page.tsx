@@ -6,13 +6,21 @@ export default function SkillForm() {
   interface Skill { name: string; course: string; }
   const [resume, setResume] = useState<string>('');
   const [skills, setSkills] = useState<Array<Skill>>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [file, setFile] = useState<File | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
+      setResume('')
+      setSkills([])
     }
+  };
+  const handleRemoveFile = () => {
+    setFile(null);
+    const fileInput = document.getElementById('pdf-upload') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+    setSkills([])
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,7 +28,7 @@ export default function SkillForm() {
     setLoading(true);
     if (resume){
       try {
-      const response = await fetch('/api/skill_analyzer/', {
+      const response = await fetch('/api/skill_analyzer/extract_skills_from_text', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: resume })
@@ -28,7 +36,7 @@ export default function SkillForm() {
     
       const data = await response.json();
       setSkills(data || []);
-      
+
     
       } catch (error) {
         console.error('Error:', error);
@@ -38,16 +46,12 @@ export default function SkillForm() {
       formData.append('file', file);
 
       try {
-        const response = await fetch('/api/skill_analyzer/file', {
+        const response = await fetch('/api/skill_analyzer/extract_skills_from_pdf', {
           method: 'POST',
           body: formData,
         });
         const data = await response.json();
         setSkills(data || []);
-        setFile(null);
-        // Очищаем input
-        const fileInput = document.getElementById('pdf-upload') as HTMLInputElement;
-        if (fileInput) fileInput.value = '';
       } catch (error) {
         console.error('Error:', error);
       }
@@ -60,12 +64,14 @@ export default function SkillForm() {
   return (
     <div className="max-w-2xl mx-auto p-6">
       <form onSubmit={handleSubmit} className="space-y-4">
+        {!file && (
         <textarea
           value={resume}
           onChange={(e) => setResume(e.target.value)}
           placeholder="Вставьте текст резюме..."
           className="w-full h-64 p-4 border rounded-lg focus:ring-2 focus:ring-blue-500"
         />
+        )}
         <input
         id="pdf-upload"
         accept=".pdf"
@@ -79,9 +85,15 @@ export default function SkillForm() {
           hover:file:bg-blue-100"
         />
         {file && (
-        <p className="mt-4 text-sm text-gray-600">
-          Выбран: {file.name}
-        </p>
+          <div className="mt-2 flex items-center justify-between bg-gray-50 p-2 rounded">
+            <span className="text-sm truncate">{file.name}</span>
+            <button
+              onClick={handleRemoveFile}
+              className="text-red-500 hover:text-red-700 text-sm font-medium"
+            >
+              ✕ Удалить
+            </button>
+          </div>
         )}
         <button
           type="submit"

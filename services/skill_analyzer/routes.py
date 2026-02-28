@@ -1,33 +1,18 @@
 from fastapi import APIRouter, Body, File, UploadFile
-from db_methods import find_skills
-from utils import extract_skills, extract_text
+from utils import extract_skills_from_text, extract_skills_from_pdf, find_courses
+from schemas import TextRequest
 
 
 router = APIRouter()
 
-@router.post("/", summary="Получить список навыков из полученного текста")
-async def get_skills(data=Body()):
-    skills = extract_skills(data['text'])
-    response = []
-    found_skills = await find_skills(skills)
-    found_skills_dict = {Skill.name: Skill.course for Skill in found_skills}
-    for skill in skills:
-        if skill in list(found_skills_dict.keys()):
-            response.insert(0, {"name": skill, "course": found_skills_dict[skill]})
-        else:
-            response.append({"name": skill, "course": None})
+@router.post("/extract_skills_from_text", summary="Получить список навыков из полученного текста")
+async def get_skills(data: TextRequest=Body()):
+    skills = extract_skills_from_text(data.text)
+    response = await find_courses(skills)
     return response
 
-@router.post("/file", summary="Получить список навыков из полученного pdf")
+@router.post("/extract_skills_from_pdf", summary="Получить список навыков из полученного pdf")
 async def get_skills_from_pdf(file: UploadFile = File(...)):
-    text = await extract_text(file)
-    skills = extract_skills(text)
-    response = []
-    found_skills = await find_skills(skills)
-    found_skills_dict = {Skill.name: Skill.course for Skill in found_skills}
-    for skill in skills:
-        if skill in list(found_skills_dict.keys()):
-            response.insert(0, {"name": skill, "course": found_skills_dict[skill]})
-        else:
-            response.append({"name": skill, "course": None})
+    skills = await extract_skills_from_pdf(file)
+    response = await find_courses(skills)
     return response

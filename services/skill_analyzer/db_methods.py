@@ -4,7 +4,7 @@ from db import connection
 
 
 @connection
-async def find_skills(data_skills: list, session):
+async def find_skills_in_db(data_skills: list, session):
     query = select(Skill).filter(Skill.name.in_(data_skills))
     result = await session.execute(query)
     return result.scalars()

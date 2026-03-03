@@ -2,7 +2,8 @@ import io
 import pickle
 import pytest
 
-from skill_analyzer import utils, model_manager
+from skill_analyzer.model_manager import model_manager
+from skill_analyzer import utils
 
 # dummy classes for mocking
 class DummyEntity:
@@ -31,11 +32,12 @@ class DummyModel:
 
 class DummyTokenizer:
     def __call__(self, x, return_tensors=None, to=None):
-        class Tensor:
+        class TensorDict(dict):
             def to(self, device):
                 return self
 
-        return Tensor()
+        # return a mapping-like object similar to real tokenizer output
+        return TensorDict({"input_ids": [0]})
 
     def decode(self, x, skip_special_tokens=True):
         # simply return a fixed string so that the normalization step is predictable
@@ -46,12 +48,29 @@ class DummyTokenizer:
 
 
 def test_extract_skills_from_text(monkeypatch):
+    # avoid loading real models during the test
+    monkeypatch.setattr(model_manager, "load_models", lambda: None)
     monkeypatch.setattr(model_manager, "get_extractor_model", lambda: DummyExtractorModel())
     monkeypatch.setattr(model_manager, "get_normalize_model", lambda: DummyModel())
     monkeypatch.setattr(model_manager, "get_tokenizer", lambda: DummyTokenizer())
 
     skills = utils.extract_skills_from_text("some resume text")
     assert skills == ["normalized"]
+
+
+def test_load_models_auto_called(monkeypatch):
+    called = False
+    def fake_load():
+        nonlocal called
+        called = True
+    monkeypatch.setattr(model_manager, "load_models", fake_load)
+    monkeypatch.setattr(model_manager, "get_extractor_model", lambda: DummyExtractorModel())
+    monkeypatch.setattr(model_manager, "get_normalize_model", lambda: DummyModel())
+    monkeypatch.setattr(model_manager, "get_tokenizer", lambda: DummyTokenizer())
+
+    # call the function; load_models should be invoked internally
+    utils.extract_skills_from_text("anything")
+    assert called, "load_models was not called automatically"
 
 
 @pytest.mark.asyncio
@@ -66,6 +85,7 @@ async def test_extract_skills_from_pdf(monkeypatch):
 
     result = await utils.extract_skills_from_pdf(FakeFile())
     assert result == ["a"]
+
 
 
 @pytest.mark.asyncio

@@ -1,16 +1,16 @@
 import pytest
 from fastapi.testclient import TestClient
-
 from skill_analyzer.main import app
 
 
 @pytest.fixture(autouse=True)
 def patch_dependencies(monkeypatch):
     # prevent heavy model loading
-    from skill_analyzer import model_manager, utils
+    from skill_analyzer.model_manager import model_manager
+    from skill_analyzer import utils
 
-    monkeypatch.setattr(model_manager.model_manager, "load_models", lambda: None)
-    monkeypatch.setattr(model_manager.model_manager, "unload_models", lambda: None)
+    monkeypatch.setattr(model_manager, "load_models", lambda: None)
+    monkeypatch.setattr(model_manager, "unload_models", lambda: None)
 
     # stub util functions used by the endpoints
     monkeypatch.setattr(utils, "extract_skills_from_text", lambda text: ["x"])

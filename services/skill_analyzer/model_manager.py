@@ -1,6 +1,5 @@
 import logging
 import spacy
-import spacy
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 
 logger = logging.getLogger(__name__)

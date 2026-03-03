@@ -1,8 +1,8 @@
 from torch import no_grad
-from model_manager import model_manager
+from .model_manager import model_manager
 from pdftext.extraction import plain_text_output
 import io
-from db_methods import find_skills_in_db
+from .db_methods import find_skills_in_db
 
 def extract_skills_from_text(resume):
     nlp = model_manager.get_extractor_model()

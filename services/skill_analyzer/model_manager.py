@@ -1,6 +1,5 @@
 import logging
 import spacy
-import spacy
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 
 logger = logging.getLogger(__name__)
@@ -38,7 +37,7 @@ class ModelManager:
             del self._extractor_model
             self._extractor_model = None
             del self._normalize_model
-            self._normalaize_model = None
+            self._normalize_model = None
             del self._tokenizer
             self._tokenizer = None
             logger.info("✅ Модель выгружена")

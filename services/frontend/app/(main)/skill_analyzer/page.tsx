@@ -4,41 +4,97 @@ import { useState } from 'react';
 
 export default function SkillForm() {
   interface Skill { name: string; course: string; }
-  const [resume, setResume] = useState('');
+  const [resume, setResume] = useState<string>('');
   const [skills, setSkills] = useState<Array<Skill>>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [file, setFile] = useState<File | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+      setResume('')
+      setSkills([])
+    }
+  };
+  const handleRemoveFile = () => {
+    setFile(null);
+    const fileInput = document.getElementById('pdf-upload') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+    setSkills([])
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      const res = await fetch('/api/skill_analyzer', {
+    if (resume){
+      try {
+      const response = await fetch('/api/skill_analyzer/extract_skills_from_text', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: resume })
       });
     
-      const data = await res.json();
+      const data = await response.json();
       setSkills(data || []);
-      
+
     
-    } catch (error) {
+      } catch (error) {
         console.error('Error:', error);
       }
+    } else if (file){
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('/api/skill_analyzer/extract_skills_from_pdf', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await response.json();
+        setSkills(data || []);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    } 
     setLoading(false);
-  };
+  }
+  
+    
 
   return (
     <div className="max-w-2xl mx-auto p-6">
       <form onSubmit={handleSubmit} className="space-y-4">
+        {!file && (
         <textarea
           value={resume}
           onChange={(e) => setResume(e.target.value)}
           placeholder="Вставьте текст резюме..."
           className="w-full h-64 p-4 border rounded-lg focus:ring-2 focus:ring-blue-500"
-          required
         />
-        
+        )}
+        <input
+        id="pdf-upload"
+        accept=".pdf"
+        type="file"
+        onChange={handleFileChange}
+        className="block w-full mb-4 text-sm text-gray-500
+          file:mr-4 file:py-2 file:px-4
+          file:rounded-full file:border-0
+          file:text-sm file:font-semibold
+          file:bg-blue-50 file:text-blue-700
+          hover:file:bg-blue-100"
+        />
+        {file && (
+          <div className="mt-2 flex items-center justify-between bg-gray-50 p-2 rounded">
+            <span className="text-sm truncate">{file.name}</span>
+            <button
+              onClick={handleRemoveFile}
+              className="text-red-500 hover:text-red-700 text-sm font-medium"
+            >
+              ✕ Удалить
+            </button>
+          </div>
+        )}
         <button
           type="submit"
           disabled={loading}
@@ -47,6 +103,11 @@ export default function SkillForm() {
           {loading ? 'Извлечение...' : 'Извлечь навыки'}
         </button>
       </form>
+      {!file && !resume && (
+        <p className="mb-4 text-sm text-gray-600">
+          Пожалуйста прикрепите файл или введите текст резюме
+        </p>
+      )}
 
       {skills?.length > 0 && (
         <div className="mt-6">

@@ -105,3 +105,11 @@ async def test_find_courses(monkeypatch):
         {"name": "foo", "course": "bar"},
         {"name": "baz", "course": None},
     ]
+
+    monkeypatch.setattr(utils, "find_skills_in_db", fake_find)
+
+    output = await utils.find_courses(["foo", "baz"])
+    assert output == [
+        {"name": "foo", "course": "bar"},
+        {"name": "baz", "course": None},
+    ]

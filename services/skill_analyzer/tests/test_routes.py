@@ -7,19 +7,20 @@ from skill_analyzer.main import app
 def patch_dependencies(monkeypatch):
     # prevent heavy model loading
     from skill_analyzer.model_manager import model_manager
-    from skill_analyzer import utils
 
     monkeypatch.setattr(model_manager, "load_models", lambda: None)
     monkeypatch.setattr(model_manager, "unload_models", lambda: None)
 
-    # stub util functions used by the endpoints
-    monkeypatch.setattr(utils, "extract_skills_from_text", lambda text: ["x"])
-    monkeypatch.setattr(utils, "extract_skills_from_pdf", lambda file: ["x"])
+    monkeypatch.setattr("skill_analyzer.routes.extract_skills_from_text", lambda text: ["x"])
+    
+    async def fake_extract_pdf(file):
+        return ["x"]
+    monkeypatch.setattr("skill_analyzer.routes.extract_skills_from_pdf", fake_extract_pdf)
 
     async def fake_find(skills):
         return [{"name": skills[0], "course": None}]
 
-    monkeypatch.setattr(utils, "find_courses", fake_find)
+    monkeypatch.setattr("skill_analyzer.routes.find_courses", fake_find)
 
 
 def test_post_text():

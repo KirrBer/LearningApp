@@ -5,6 +5,7 @@ import io
 from .db_methods import find_skills_in_db
 
 def extract_skills_from_text(resume):
+    model_manager.load_models()
     nlp = model_manager.get_extractor_model()
     doc = nlp(resume)
     extracted_skills = set()

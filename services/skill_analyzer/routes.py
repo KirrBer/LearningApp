@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Body, File, UploadFile
-from .utils import extract_skills_from_text, extract_skills_from_pdf, find_courses
-from .schemas import TextRequest, SkillResponse
+from utils import extract_skills_from_text, extract_skills_from_pdf, find_courses
+from schemas import TextRequest, SkillResponse
 from typing import List
 
 

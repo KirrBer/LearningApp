@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from .routes import router
-from .model_manager import model_manager
+from routes import router
+from model_manager import model_manager
 from contextlib import asynccontextmanager
 import logging
 

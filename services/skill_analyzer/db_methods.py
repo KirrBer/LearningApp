@@ -1,6 +1,6 @@
 from sqlalchemy import select
-from .models import Skill
-from .db import connection
+from models import Skill
+from db import connection
 
 
 @connection

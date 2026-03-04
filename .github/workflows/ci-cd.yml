@@ -40,6 +40,14 @@ jobs:
             DB_HOST: ${{ secrets.DB_HOST }}
         working-directory: ./services/skill_analyzer
         run: |
-          pytest tests/ -v --cov=./ --cov-report=xml
+          pytest tests/ -v --cov=./ --cov-report=xml --cov-report=term
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./services/skill_analyzer/coverage.xml
+          flags: unittests
+          name: skill-analyzer-coverage
+          fail_ci_if_error: true
 
     

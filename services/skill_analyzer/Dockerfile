@@ -13,8 +13,10 @@ RUN pip install --index-url https://download.pytorch.org/whl/cpu torch
  
 COPY . . 
 
+ENV PYTHONPATH=/skill_analyzer:/skill_analyzer/..
+
 COPY ./entrypoint.sh .
 RUN chmod +x entrypoint.sh
 ENTRYPOINT ["./entrypoint.sh"]
  
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "skill_analyzer.main:app", "--host", "0.0.0.0", "--port", "8000"]

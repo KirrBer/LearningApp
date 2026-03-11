@@ -1,6 +1,6 @@
 import requests
 
-def get_vacancies(text='', per_page=100, professional_role=11):
+def get_vacancies_id(text='', per_page=100, professional_role=11):
     url = 'https://api.hh.ru/vacancies'
     params = {
         'text': text,
@@ -20,16 +20,17 @@ def get_vacancy(id):
     if response.status_code == 200:
         data = response.json()
         return {
-            'id': data['id'],
-            'name': data['name'],
-            'description': data['description'],
-            'employer': data['employer']['name'],
+            'id': data.get('id'),
+            'name': data.get('name'),
+            'description': data.get('description'),
+            'employer': data.get('employer', {}).get('name'),
             'salary': data.get('salary'),
             'employment': data.get('employment', {}).get('name'),
             'schedule': data.get('schedule', {}).get('name'),
             'experience': data.get('experience', {}).get('name'),
-            'area': data['area']['name']
+            'area': data.get('area', {}).get('name')
         }
     else:
         print(f"Ошибка {response.status_code}")
         return None
+    

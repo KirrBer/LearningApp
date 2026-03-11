@@ -22,10 +22,10 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_DB: ${POSTGRES_DB_SA}
       PGDATA: ${PGDATA}
       DB_PORT: ${DB_PORT}
-      DB_HOST: ${DB_HOST}
+      DB_HOST: ${DB_HOST_SA}
     ports: 
       - "8000:8000"
     networks:
@@ -35,12 +35,41 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_DB: ${POSTGRES_DB_SA}
       PGDATA: ${PGDATA}
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5432:${DB_PORT}"
+    restart: unless-stopped
+    networks:
+      - default
+  job_service:
+    build: ./job_service
+    depends_on: 
+      - job_service_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_JS}
+      PGDATA: ${PGDATA}
+      DB_PORT: ${DB_PORT}
+      DB_HOST: ${DB_HOST_JS}
+    ports: 
+      - "8001:8000"
+    networks:
+      - default
+  job_service_db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_JS}
+      PGDATA: ${PGDATA}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:${DB_PORT}"
     restart: unless-stopped
     networks:
       - default

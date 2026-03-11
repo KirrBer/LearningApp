@@ -33,7 +33,7 @@ jobs:
       - name: Run backend tests
         env:
             POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-            POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+            POSTGRES_DB_SA: ${{ secrets.POSTGRES_DB_SA }}
             POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
             PGDATA: ${{ secrets.PGDATA }}
             DB_PORT: ${{ secrets.DB_PORT }}

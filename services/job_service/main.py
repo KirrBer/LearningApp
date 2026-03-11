@@ -4,5 +4,5 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 app.include_router(router)

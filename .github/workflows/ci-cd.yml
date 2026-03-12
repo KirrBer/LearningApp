@@ -33,11 +33,11 @@ jobs:
       - name: Run backend tests
         env:
             POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-            POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+            POSTGRES_DB: ${{ secrets.POSTGRES_DB_SA }}
             POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
             PGDATA: ${{ secrets.PGDATA }}
             DB_PORT: ${{ secrets.DB_PORT }}
-            DB_HOST: ${{ secrets.DB_HOST }}
+            DB_HOST: ${{ secrets.DB_HOST_SA }}
         working-directory: ./services/skill_analyzer
         run: |
           pytest tests/ -v --cov=./ --cov-report=xml --cov-report=term

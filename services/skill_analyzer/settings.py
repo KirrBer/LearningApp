@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     DB_PORT: int
     POSTGRES_DB: str
     PGDATA: str
+    KAFKA_BOOTSTRAP_SERVERS: str
     
     model_config = SettingsConfigDict(
         env_file=".env",

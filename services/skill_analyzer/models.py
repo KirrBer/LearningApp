@@ -1,4 +1,4 @@
-from .db import Base, str_uniq, int_pk
+from skill_analyzer.db import Base, str_uniq, int_pk
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 

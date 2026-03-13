@@ -13,7 +13,7 @@ RUN pip install --index-url https://download.pytorch.org/whl/cpu torch
  
 COPY . . 
 
-ENV PYTHONPATH=/skill_analyzer:/skill_analyzer/..
+ENV PYTHONPATH=/
 
 COPY ./entrypoint.sh .
 RUN chmod +x entrypoint.sh

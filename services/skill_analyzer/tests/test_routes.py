@@ -14,13 +14,24 @@ def patch_dependencies(monkeypatch):
     monkeypatch.setattr("skill_analyzer.routes.extract_skills_from_text", lambda text: ["x"])
     
     async def fake_extract_pdf(file):
-        return ["x"]
-    monkeypatch.setattr("skill_analyzer.routes.extract_skills_from_pdf", fake_extract_pdf)
+        return "some text"
+    monkeypatch.setattr("skill_analyzer.routes.extract_text_from_pdf", fake_extract_pdf)
 
     async def fake_find(skills):
         return [{"name": skills[0], "course": None}]
 
     monkeypatch.setattr("skill_analyzer.routes.find_courses", fake_find)
+
+    # Mock kafka_manager
+    class FakeProducer:
+        def send(self, topic, value):
+            pass  # Do nothing in tests
+
+    class FakeKafkaManager:
+        def __init__(self):
+            self.producer = FakeProducer()
+
+    monkeypatch.setattr("skill_analyzer.routes.kafka_manager", FakeKafkaManager())
 
 
 def test_post_text():

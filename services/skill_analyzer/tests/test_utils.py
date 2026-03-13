@@ -74,17 +74,16 @@ def test_load_models_auto_called(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_extract_skills_from_pdf(monkeypatch):
+async def test_extract_text_from_pdf(monkeypatch):
     # stub the text extractor and pdf converter
-    monkeypatch.setattr(utils, "extract_skills_from_text", lambda text: ["a"])
     monkeypatch.setattr(utils, "plain_text_output", lambda buf, sort, hyphens: "some text")
 
     class FakeFile:
         async def read(self):
             return b"fake pdf bytes"
 
-    result = await utils.extract_skills_from_pdf(FakeFile())
-    assert result == ["a"]
+    result = await utils.extract_text_from_pdf(FakeFile())
+    assert result == "some text"
 
 
 

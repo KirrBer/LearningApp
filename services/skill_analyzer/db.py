@@ -4,7 +4,7 @@ from typing import Annotated
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column
-from .settings import settings
+from skill_analyzer.settings import settings
 
 
 DATABASE_URL = settings.get_db_url()

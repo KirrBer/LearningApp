@@ -1,8 +1,8 @@
 import asyncio
 import logging
-from .settings import settings
-from .models import Skill
-from .db import async_session_maker
+from skill_analyzer.settings import settings
+from skill_analyzer.models import Skill
+from skill_analyzer.db import async_session_maker
 from sqlalchemy import select
 
 

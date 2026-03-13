@@ -12,3 +12,4 @@ transformers==5.1.0
 protobuf==3.20.3
 pdftext==0.6.3
 python-multipart==0.0.21
+aiokafka

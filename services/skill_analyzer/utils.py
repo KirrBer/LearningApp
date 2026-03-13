@@ -1,8 +1,8 @@
 from torch import no_grad
-from .model_manager import model_manager
+from skill_analyzer.model_manager import model_manager
 from pdftext.extraction import plain_text_output
 import io
-from .db_methods import find_skills_in_db
+from skill_analyzer.db_methods import find_skills_in_db
 
 def extract_skills_from_text(resume):
     model_manager.load_models()
@@ -27,7 +27,7 @@ def extract_skills_from_text(resume):
     normalized_skills = list(set([answer("normalize skill: "+skill) for skill in cleared_skills]))
     return normalized_skills
 
-async def extract_skills_from_pdf(file):
+async def extract_text_from_pdf(file):
     contents = await file.read()
     
     text = plain_text_output(
@@ -35,8 +35,7 @@ async def extract_skills_from_pdf(file):
         sort=True,
         hyphens=False
     )
-    result = extract_skills_from_text(text)
-    return result
+    return text
 async def find_courses(skills):
     result = []
     found_skills = await find_skills_in_db(skills)

@@ -1,3 +1,12 @@
+"""Kafka manager for Skill Analyzer.
+
+Обрабатывает входящие сообщения из топиков:
+- extract_skills_from_text
+- extract_skills_from_pdf
+
+Публикует результаты в топик `extraction_results`.
+"""
+
 from aiokafka import AIOKafkaProducer, AIOKafkaConsumer
 import asyncio
 import json
@@ -5,6 +14,8 @@ from skill_analyzer.settings import settings
 from skill_analyzer.utils import extract_skills_from_text, extract_text_from_pdf
 
 class KafkaManager:
+    """Управляет Kafka producer/consumer и обрабатывает входящие сообщения."""
+
     _instance = None
     def __new__(cls):
         if cls._instance is None:
@@ -16,7 +27,9 @@ class KafkaManager:
         self.tasks = []
         
     async def start(self):
-        # Запускаем producer
+        """Инициализация Kafka producer/consumer и запуск цикла обработки сообщений."""
+
+        # Producer отправляет результаты извлечения навыков.
         self.producer = AIOKafkaProducer(
             bootstrap_servers=settings.KAFKA_BOOTSTRAP_SERVERS,
             client_id='skill-analyzer-producer',
@@ -39,15 +52,17 @@ class KafkaManager:
         asyncio.create_task(self.consume_loop())
         
     async def consume_loop(self):
+        """Фоновый цикл, читающий сообщения из Kafka и обрабатывающий их."""
+
         async for msg in self.consumer:
             task = asyncio.create_task(self.process_message(msg))
             self.tasks.append(task)
-            
+
             # Очищаем завершенные задачи
             self.tasks = [t for t in self.tasks if not t.done()]
 
     async def process_message(self, msg):
-        """Обработка одного сообщения"""
+        """Обрабатывает одно сообщение из Kafka и отправляет результат в топик extraction_results."""
         if msg.topic == 'extract_skills_from_text':
             result = extract_skills_from_text(msg.value)
         elif msg.topic == 'extract_skills_from_pdf':

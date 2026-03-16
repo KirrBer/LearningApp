@@ -28,7 +28,15 @@ class DummyModel:
 
     def generate(self, **kwargs):
         # always return an iterable whose first element can be decoded
-        return ["whatever"]
+        return DummyAnswer()
+    def compute_transition_scores(self, sequences, scores, normalize_logits=True):
+        # return a tensor of log-probabilities; for simplicity, we return a fixed value
+        from torch import tensor
+        return tensor([[-0.1, -0.2, -0.3]])  # log-probs for each token in the sequence
+class DummyAnswer:
+    def __init__(self):
+        self.sequences = ["something"]
+        self.scores = []
 
 class DummyTokenizer:
     def __call__(self, x, return_tensors=None, to=None):

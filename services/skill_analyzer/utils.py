@@ -60,7 +60,7 @@ def extract_skills_from_text(resume: str) -> list[str]:
         normalized_skill, confidence = normalize("normalize skill: " + skill)
         if confidence > 0.74:  # фильтр по порогу уверенности (можно настроить)
             normalized_skills.add(normalized_skill)
-    return normalized_skills
+    return list(normalized_skills)
 
 
 async def extract_text_from_pdf(file) -> str:

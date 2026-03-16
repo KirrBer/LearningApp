@@ -50,15 +50,15 @@ def extract_skills_from_text(resume: str) -> list[str]:
                 
             # Получаем вероятности (exp от лог-вероятностей)
             probs = exp(transition_scores[0])
-            probs_mean = probs.mean().item()
-        return [tokenizer.decode(hypotheses.sequences[0], skip_special_tokens=True), probs_mean]
+            probs_min = probs.min().item()
+        return [tokenizer.decode(hypotheses.sequences[0], skip_special_tokens=True), probs_min]
 
 
     # Нормализуем каждый навык и возвращаем уникальные значения.
     normalized_skills = set()
     for skill in extracted_skills:
         normalized_skill, confidence = normalize("normalize skill: " + skill)
-        if confidence > 0.74:  # фильтр по порогу уверенности (можно настроить)
+        if confidence > 0.45:  # фильтр по порогу уверенности (можно настроить)
             normalized_skills.add(normalized_skill)
     return list(normalized_skills)
 

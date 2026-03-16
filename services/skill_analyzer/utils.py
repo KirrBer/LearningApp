@@ -6,7 +6,7 @@
 - поиск учебных курсов по найденным навыкам
 """
 
-from torch import no_grad
+from torch import no_grad, exp
 from skill_analyzer.model_manager import model_manager
 from pdftext.extraction import plain_text_output
 import io
@@ -38,14 +38,28 @@ def extract_skills_from_text(resume: str) -> list[str]:
     tokenizer = model_manager.get_tokenizer()
     model.eval()
 
-    def normalize(text: str, **kwargs) -> str:
-        inputs = tokenizer(text, return_tensors="pt").to(model.device)
+    def normalize(text: str, **kwargs) -> list[str, float]:
+        inputs = tokenizer(text, return_tensors='pt').to(model.device)
         with no_grad():
-            hypotheses = model.generate(**inputs, **kwargs)
-        return tokenizer.decode(hypotheses[0], skip_special_tokens=True)
+            hypotheses = model.generate(return_dict_in_generate=True, output_scores=True, **inputs, **kwargs)
+            transition_scores = model.compute_transition_scores(
+                hypotheses.sequences, 
+                hypotheses.scores, 
+                normalize_logits=True
+            )
+                
+            # Получаем вероятности (exp от лог-вероятностей)
+            probs = exp(transition_scores[0])
+            probs_mean = probs.mean().item()
+        return [tokenizer.decode(hypotheses.sequences[0], skip_special_tokens=True), probs_mean]
+
 
     # Нормализуем каждый навык и возвращаем уникальные значения.
-    normalized_skills = list(set([normalize("normalize skill: " + skill) for skill in extracted_skills]))
+    normalized_skills = set()
+    for skill in extracted_skills:
+        normalized_skill, confidence = normalize("normalize skill: " + skill)
+        if confidence > 0.74:  # фильтр по порогу уверенности (можно настроить)
+            normalized_skills.add(normalized_skill)
     return normalized_skills
 
 

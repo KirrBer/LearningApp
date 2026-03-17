@@ -12,6 +12,10 @@ RUN pip install -r requirements.txt
  
 COPY . . 
 
-ENV PYTHONPATH=/job_service:/job_service/..
+ENV PYTHONPATH=/
+
+COPY ./entrypoint.sh .
+RUN chmod +x entrypoint.sh
+ENTRYPOINT ["./entrypoint.sh"]
  
 CMD ["uvicorn", "job_service.main:app", "--host", "0.0.0.0", "--port", "8000"]

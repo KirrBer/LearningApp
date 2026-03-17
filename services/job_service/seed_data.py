@@ -23,7 +23,4 @@ async def seed_skills_with_models(session):
         if not existing:
             vacancy = Vacancy(**vacancy_data)
             session.add(vacancy)
-            logger.info(f"✅ Добавлен навык: {vacancy_data['name']}")
-        else:
-            existing.course = vacancy_data["course"]
-            logger.info(f"🔄 Обновлен навык: {vacancy_data['name']}")
+    logger.info("данные успешно добавлены или обновлены в базе данных")

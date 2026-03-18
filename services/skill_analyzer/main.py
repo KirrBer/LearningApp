@@ -13,6 +13,7 @@ from skill_analyzer.model_manager import model_manager
 from skill_analyzer.kafka import kafka_manager
 from contextlib import asynccontextmanager
 import logging
+from skill_analyzer.threadpool import threadpool_manager
 
 logging.basicConfig(level=logging.INFO)
 
@@ -24,11 +25,13 @@ async def lifespan(app: FastAPI):
     # Запускаем Kafka producer/consumer.
     await kafka_manager.start()
 
+    threadpool_manager.create()
     yield
 
     # Очищаем ресурсы при остановке приложения.
     model_manager.unload_models()
     await kafka_manager.stop()
+    threadpool_manager.stop()
  
 app = FastAPI(lifespan=lifespan)
 

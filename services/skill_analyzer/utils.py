@@ -65,14 +65,12 @@ def extract_skills_from_text(resume: str) -> list[str]:
                 normalize_logits=True
             )
             
-            # Конвертируем в numpy для быстрых операций
-            scores_np = transition_scores.cpu().numpy()
-            
-            # Векторизованное вычисление вероятностей
-            probs = np.exp(scores_np)
+            scores_np = [np.array([float(i) for i in row]) for row in transition_scores]
+            scores_np = [row[row >= np.log(0.01)] for row in scores_np]
             
             # Минимальные вероятности для каждого примера в батче
-            min_probs = probs.min(axis=1)
+            min_probs = [np.min(row) for row in scores_np]
+            print(min_probs)
 
         results = []
         for i, seq in enumerate(hypotheses.sequences):
@@ -80,7 +78,6 @@ def extract_skills_from_text(resume: str) -> list[str]:
             results.append((decoded, float(min_probs[i])))
         
         return results
-
 
     # Нормализуем каждый навык и возвращаем уникальные значения.
     normalized_skills = set()
@@ -91,7 +88,7 @@ def extract_skills_from_text(resume: str) -> list[str]:
         
         # Фильтруем по порогу уверенности
         for skill, confidence in batch_results:
-            if confidence > 0.45:
+            if confidence > np.log(0.45):
                 normalized_skills.add(skill)
     
     return list(normalized_skills)

@@ -9,7 +9,8 @@ from skill_analyzer.utils import extract_skills_from_text, extract_text_from_pdf
 from skill_analyzer.schemas import TextRequest, SkillResponse
 from skill_analyzer.kafka import kafka_manager
 from typing import List
-from fastapi.concurrency import run_in_threadpool
+from skill_analyzer.threadpool import threadpool_manager
+
 
 
 router = APIRouter()
@@ -20,7 +21,7 @@ async def get_skills(data: TextRequest = Body(...)) -> List[SkillResponse]:
 
     # Нормализация и извлечение навыков выполняется в отдельном потоке,
     # чтобы не блокировать основной event loop.
-    skills = await run_in_threadpool(extract_skills_from_text, data.text)
+    skills = await threadpool_manager.run_in_custom_threadpool(extract_skills_from_text, data.text)
 
     # Ищем сопоставленные курсы в базе.
     response = await find_courses(skills)
@@ -35,8 +36,9 @@ async def get_skills_from_pdf(file: UploadFile = File(...)) -> List[SkillRespons
 
     text = await extract_text_from_pdf(file)
 
-    skills = await run_in_threadpool(extract_skills_from_text, text)
+    skills = await threadpool_manager.run_in_custom_threadpool(extract_skills_from_text, text)
     response = await find_courses(skills)
 
     await kafka_manager.producer.send('extraction_results', value=skills)
     return response
+

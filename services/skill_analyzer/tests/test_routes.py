@@ -7,9 +7,13 @@ from skill_analyzer.main import app
 def patch_dependencies(monkeypatch):
     # prevent heavy model loading
     from skill_analyzer.model_manager import model_manager
+    from skill_analyzer.threadpool import threadpool_manager
 
     monkeypatch.setattr(model_manager, "load_models", lambda: None)
     monkeypatch.setattr(model_manager, "unload_models", lambda: None)
+
+    # Initialize threadpool_manager for testing
+    threadpool_manager.create()
 
     monkeypatch.setattr("skill_analyzer.routes.extract_skills_from_text", lambda text: ["x"])
     
@@ -24,7 +28,7 @@ def patch_dependencies(monkeypatch):
 
     # Mock kafka_manager
     class FakeProducer:
-        def send(self, topic, value):
+        async def send(self, topic, value):
             pass  # Do nothing in tests
 
     class FakeKafkaManager:

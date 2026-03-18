@@ -2,8 +2,11 @@
 
 import { useState } from 'react';
 
+// Страница Skill Analyzer: позволяет вставить текст резюме или загрузить PDF.
+// Далее отправляет данные в backend и отображает найденные навыки + курсы.
 export default function SkillForm() {
   interface Skill { name: string; course: string; }
+
   const [resume, setResume] = useState<string>('');
   const [skills, setSkills] = useState<Array<Skill>>([]);
   const [loading, setLoading] = useState<boolean>(false);

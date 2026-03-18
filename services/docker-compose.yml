@@ -1,3 +1,13 @@
+# docker-compose.yml — локальная конфигурация всех сервисов проекта.
+# Сборка сервисов:
+#   * nginx         — reverse-proxy/статический сервер (настраивается в nginx.conf)
+#   * nextjs        — frontend приложение (Next.js)
+#   * skill_analyzer — сервис/ML-пайплайн для извлечения навыков
+#   * job_service   — API для вакансий
+#   * kafka         — брокер сообщений (используется skill_analyzer)
+#
+# Настройки берутся из файла services/.env (см. README.md)
+
 services:
   nginx:
     image: nginx:alpine
@@ -86,7 +96,7 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_LOG_DIRS: /var/lib/kafka/data
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
     volumes:
       - kafka-data:/var/lib/kafka/data
     networks:

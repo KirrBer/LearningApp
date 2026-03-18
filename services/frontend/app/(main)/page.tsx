@@ -1,13 +1,34 @@
+// Главная страница приложения (landing page).
+// Содержит ссылки на авторизацию и регистрацию.
+
 import mainImage from '@/app/assets/main.jpeg';
 import Link from "next/link";
 import Image from "next/image";
 
 export default function MainPage() {
-    return(
+    return (
         <div className='w-full h-[50vh] relative'>
-            <Image src={mainImage} alt='programming' width={2560} height={1707} className='w-full h-full object-cover flex items-center justify-center'></Image>
-            <Link href={"/login"} className='absolute top-1/3 inset-x-1/4 bg-gray-200 p-3 text-sm lg:text-xl font-bold hover:bg-gray-400 flex justify-center'>Войти</Link>
-            <Link href={"/registration"} className='absolute top-3/5 inset-x-1/4 bg-gray-200 p-3 text-sm lg:text-xl font-bold hover:bg-gray-400 flex justify-center'>Зарегистрироваться</Link>
+            <Image
+                src={mainImage}
+                alt='programming'
+                width={2560}
+                height={1707}
+                className='w-full h-full object-cover flex items-center justify-center'
+            />
+
+            <Link
+                href={'/login'}
+                className='absolute top-1/3 inset-x-1/4 bg-gray-200 p-3 text-sm lg:text-xl font-bold hover:bg-gray-400 flex justify-center'
+            >
+                Войти
+            </Link>
+
+            <Link
+                href={'/registration'}
+                className='absolute top-3/5 inset-x-1/4 bg-gray-200 p-3 text-sm lg:text-xl font-bold hover:bg-gray-400 flex justify-center'
+            >
+                Зарегистрироваться
+            </Link>
         </div>
     );
 }

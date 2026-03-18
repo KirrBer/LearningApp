@@ -50,6 +50,10 @@ class KafkaManager:
         
         # Запускаем обработку в фоне
         asyncio.create_task(self.consume_loop())
+    
+    async def stop(self):
+        await self.producer.stop()
+        await self.consumer.stop()
         
     async def consume_loop(self):
         """Фоновый цикл, читающий сообщения из Kafka и обрабатывающий их."""

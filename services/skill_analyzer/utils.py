@@ -6,11 +6,12 @@
 - поиск учебных курсов по найденным навыкам
 """
 
-from torch import no_grad, exp
+import torch
 from skill_analyzer.model_manager import model_manager
 from pdftext.extraction import plain_text_output
 import io
 from skill_analyzer.db_methods import find_skills_in_db
+import numpy as np
 
 
 def extract_skills_from_text(resume: str) -> list[str]:
@@ -33,33 +34,66 @@ def extract_skills_from_text(resume: str) -> list[str]:
         if "\n" in item:
             item = item.replace("\n", " ")
         extracted_skills.add(item)
-
+    extracted_skills = list(extracted_skills)
     model = model_manager.get_normalize_model()
     tokenizer = model_manager.get_tokenizer()
     model.eval()
 
-    def normalize(text: str, **kwargs) -> list[str, float]:
-        inputs = tokenizer(text, return_tensors='pt').to(model.device)
-        with no_grad():
-            hypotheses = model.generate(return_dict_in_generate=True, output_scores=True, **inputs, **kwargs)
+    def normalize_skills_batch(skills_batch: list[str]) -> list[tuple[str, float]]:
+        texts = ["normalize skill: " + skill for skill in skills_batch]
+        inputs = tokenizer(
+            texts,
+            return_tensors='pt',
+            padding=True,
+            truncation=True
+        ).to(model.device)
+
+        with torch.no_grad():
+            # Генерация для всего батча
+            hypotheses = model.generate(
+                **inputs,
+                max_length=32,  # Ограничиваем длину выхода
+                num_beams=1,     # Жадная декодинг для скорости
+                return_dict_in_generate=True,
+                output_scores=True
+            )
+            
+            # Вычисляем confidence для всего батча с помощью numpy
             transition_scores = model.compute_transition_scores(
-                hypotheses.sequences, 
-                hypotheses.scores, 
+                hypotheses.sequences,
+                hypotheses.scores,
                 normalize_logits=True
             )
-                
-            # Получаем вероятности (exp от лог-вероятностей)
-            probs = exp(transition_scores[0])
-            probs_min = probs.min().item()
-        return [tokenizer.decode(hypotheses.sequences[0], skip_special_tokens=True), probs_min]
+            
+            # Конвертируем в numpy для быстрых операций
+            scores_np = transition_scores.cpu().numpy()
+            
+            # Векторизованное вычисление вероятностей
+            probs = np.exp(scores_np)
+            
+            # Минимальные вероятности для каждого примера в батче
+            min_probs = probs.min(axis=1)
+
+        results = []
+        for i, seq in enumerate(hypotheses.sequences):
+            decoded = tokenizer.decode(seq, skip_special_tokens=True)
+            results.append((decoded, float(min_probs[i])))
+        
+        return results
 
 
     # Нормализуем каждый навык и возвращаем уникальные значения.
     normalized_skills = set()
-    for skill in extracted_skills:
-        normalized_skill, confidence = normalize("normalize skill: " + skill)
-        if confidence > 0.45:  # фильтр по порогу уверенности (можно настроить)
-            normalized_skills.add(normalized_skill)
+    batch_size = 16
+    for i in range(0, len(extracted_skills), batch_size):
+        batch = extracted_skills[i:i + batch_size]
+        batch_results = normalize_skills_batch(batch)
+        
+        # Фильтруем по порогу уверенности
+        for skill, confidence in batch_results:
+            if confidence > 0.45:
+                normalized_skills.add(skill)
+    
     return list(normalized_skills)
 
 

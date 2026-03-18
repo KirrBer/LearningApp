@@ -28,6 +28,7 @@ async def lifespan(app: FastAPI):
 
     # Очищаем ресурсы при остановке приложения.
     model_manager.unload_models()
+    await kafka_manager.stop()
  
 app = FastAPI(lifespan=lifespan)
 

@@ -26,7 +26,7 @@ async def get_skills(data: TextRequest = Body(...)) -> List[SkillResponse]:
     response = await find_courses(skills)
 
     # Публикуем результат в Kafka для последующей обработки или аналитики.
-    kafka_manager.producer.send('extraction_results', value=skills)
+    await kafka_manager.producer.send('extraction_results', value=skills)
     return response
 
 @router.post("/extract_skills_from_pdf", summary="Получить список навыков из полученного pdf")
@@ -38,5 +38,5 @@ async def get_skills_from_pdf(file: UploadFile = File(...)) -> List[SkillRespons
     skills = await run_in_threadpool(extract_skills_from_text, text)
     response = await find_courses(skills)
 
-    kafka_manager.producer.send('extraction_results', value=skills)
+    await kafka_manager.producer.send('extraction_results', value=skills)
     return response

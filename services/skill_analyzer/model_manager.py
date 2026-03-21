@@ -7,6 +7,7 @@
 import logging
 import spacy
 from transformers import T5ForConditionalGeneration, T5Tokenizer
+import torch
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ class ModelManager:
             self._extractor_model = spacy.load("./extractor_model/model-best")
             logger.info("✅ Extractor model loaded!")
 
-            self._normalize_model = T5ForConditionalGeneration.from_pretrained("./normalize_model")
+            self._normalize_model =  torch.compile(T5ForConditionalGeneration.from_pretrained("./normalize_model"))
             self._tokenizer = T5Tokenizer.from_pretrained("./normalize_model")
             self._normalize_model.eval()
             logger.info("✅ Normalize model loaded!")

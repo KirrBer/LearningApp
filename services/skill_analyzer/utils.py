@@ -37,7 +37,6 @@ def extract_skills_from_text(resume: str) -> list[str]:
     extracted_skills = list(extracted_skills)
     model = model_manager.get_normalize_model()
     tokenizer = model_manager.get_tokenizer()
-    model.eval()
 
     def normalize_skills_batch(skills_batch: list[str]) -> list[tuple[str, float]]:
         texts = ["normalize skill: " + skill for skill in skills_batch]
@@ -48,7 +47,7 @@ def extract_skills_from_text(resume: str) -> list[str]:
             truncation=True
         ).to(model.device)
 
-        with torch.no_grad():
+        with torch.inference_mode():
             # Генерация для всего батча
             hypotheses = model.generate(
                 **inputs,
@@ -70,7 +69,6 @@ def extract_skills_from_text(resume: str) -> list[str]:
             
             # Минимальные вероятности для каждого примера в батче
             min_probs = [np.min(row) for row in scores_np]
-            print(min_probs)
 
         results = []
         for i, seq in enumerate(hypotheses.sequences):

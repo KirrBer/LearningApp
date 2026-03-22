@@ -23,4 +23,5 @@ async def seed_skills_with_models(session):
         if not existing:
             vacancy = Vacancy(**vacancy_data)
             session.add(vacancy)
+            session.commit()
     logger.info("данные успешно добавлены или обновлены в базе данных")

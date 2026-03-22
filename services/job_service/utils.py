@@ -2,7 +2,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from db_methods import get_all_vacancies
 
-def recommendation_sort(resume):
+def recommendations_sort(resume):
 
     vacancies = get_all_vacancies()
 

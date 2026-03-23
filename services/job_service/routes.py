@@ -12,5 +12,5 @@ router = APIRouter()  # TODO: добавить реальные роуты (GET/
 
 @router.post("/recommendations", summary="Получить список навыков из полученного текста")
 async def get_recommendations(data: ResumeRequest = Body(...)) -> List[VacancyResponse]:
-    response = recommendations_sort(data.resume)
+    response = await recommendations_sort(data.resume)
     return response

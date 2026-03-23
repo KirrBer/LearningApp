@@ -11,5 +11,5 @@ class Vacancy(Base):
     salary: Mapped[str_null_true]
     employment: Mapped[str_null_true]
     schedule: Mapped[str_null_true]
-    expirience: Mapped[str_null_true]
+    experience: Mapped[str_null_true]
     area: Mapped[str_null_true]

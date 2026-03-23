@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Vacancies } from '@/app/components/Vacancies';
 
 // Страница Skill Analyzer: позволяет вставить текст резюме или загрузить PDF.
 // Далее отправляет данные в backend и отображает найденные навыки + курсы.
@@ -137,6 +138,7 @@ export default function SkillForm() {
           </div>
         </div>
       )}
+      {skills?.length && <Vacancies resume={resume} />}
     </div>
   );
 }

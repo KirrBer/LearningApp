@@ -16,12 +16,13 @@ async def seed_skills_with_models(session):
     """Заполнение навыков используя модели SQLAlchemy"""
     ids = get_vacancies_id()
     for id in ids:
-        vacancy_data = get_vacancy(id)
-        query = select(Vacancy).where(Vacancy.name == vacancy_data["name"])
+        query = select(Vacancy).where(Vacancy.id == int(id))
         result = await session.execute(query)
         existing = result.scalar_one_or_none()
         if not existing:
+            vacancy_data = get_vacancy(id)
             vacancy = Vacancy(**vacancy_data)
             session.add(vacancy)
-            session.commit()
+            await session.commit()
     logger.info("данные успешно добавлены или обновлены в базе данных")
+asyncio.run(seed_skills_with_models())

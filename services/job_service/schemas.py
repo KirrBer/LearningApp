@@ -12,5 +12,5 @@ class VacancyResponse(BaseModel):
     salary: str | None
     employment: str | None
     schedule: str | None
-    expirience: str | None
+    experience: str | None
     area: str | None

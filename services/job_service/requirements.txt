@@ -6,4 +6,4 @@ asyncpg==0.29.0
 uvicorn==0.40.0
 fastapi==0.128.0
 requests==2.31.0
-sklearn
+scikit-learn

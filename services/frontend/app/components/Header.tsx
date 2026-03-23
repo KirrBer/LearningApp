@@ -32,7 +32,7 @@ export const Header = () => {
                     <Link href={"/courses"} className="hover:text-blue-600 transition-colors">База курсов</Link>
                     <Link href={"/jobs"} className="hover:text-blue-600 transition-colors">Вакансии</Link>
                     <Link href={"/learning_path_generator"} className="lg:block hover:text-blue-600 transition-colors">Генератор путей</Link>
-                    <Link href={"/skills_analyzer"} className="lg:block hover:text-blue-600 transition-colors">Анализ скилов</Link>
+                    <Link href={"/skill_analyzer"} className="lg:block hover:text-blue-600 transition-colors">Анализ скилов</Link>
                     <Link href={"/profile"} className="lg:block hover:text-blue-600 transition-colors">Профиль</Link>
                 </div>
                 }

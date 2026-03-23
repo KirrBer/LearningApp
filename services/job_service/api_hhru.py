@@ -1,11 +1,12 @@
 import requests
 
-def get_vacancies_id():
+def get_vacancies_id(page=0):
     url = 'https://api.hh.ru/vacancies'
     variants = "разработчик OR программист OR аналитик OR it OR developer OR junior OR middle OR senior"
     params = {
         'text': variants,
-        'per_page': 100
+        'per_page': 100,
+        'page': page
     }
     response = requests.get(url, params=params)
     if response.status_code == 200:

@@ -14,7 +14,9 @@ DATABASE_URL = settings.get_db_url()
 @connection
 async def seed_skills_with_models(session):
     """Заполнение навыков используя модели SQLAlchemy"""
-    ids = get_vacancies_id()
+    ids = []
+    for i in range(7):
+        ids += get_vacancies_id()
     for id in ids:
         query = select(Vacancy).where(Vacancy.id == int(id))
         result = await session.execute(query)

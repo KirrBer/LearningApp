@@ -71,7 +71,11 @@ export default function SkillForm() {
         {!file && (
         <textarea
           value={resume}
-          onChange={(e) => setResume(e.target.value)}
+          onChange={(e) => {
+            setResume(e.target.value)
+            setSkills([])
+            }
+          }
           placeholder="Вставьте текст резюме..."
           className="w-full h-64 p-4 border rounded-lg focus:ring-2 focus:ring-blue-500"
         />
@@ -138,7 +142,8 @@ export default function SkillForm() {
           </div>
         </div>
       )}
-      {skills?.length && <Vacancies resume={resume} />}
+      {resume && skills?.length > 0 && <Vacancies resume={resume} file={null} />}
+      {file && skills?.length > 0 && <Vacancies file={file} resume={null} />}
     </div>
   );
 }

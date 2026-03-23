@@ -15,25 +15,37 @@ interface Vacancy {
 }
 
 interface VacanciesProps {
-  resume: string;
+  resume: string | null;
+  file: File | null;
 }
 
-export function Vacancies({ resume }: VacanciesProps) {
+export function Vacancies({ resume, file }: VacanciesProps) {
     const [vacancies, setVacancies] = useState<Array<Vacancy>>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         try {
-        fetch('/api/job_service/recommendations', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ resume: resume })
-        }).then(res => res.json())
-        .then(data => {
-            setVacancies(data);
-            setLoading(false);
-        });
-        } catch (error) {
+            if (resume){
+                fetch('/api/job_service/recommendations_from_text', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ resume: resume })
+                }).then(res => res.json()).then(data => {
+                    setVacancies(data);
+                    setLoading(false);
+                });
+            } else if (file){
+                const formData = new FormData();
+                formData.append('file', file);
+                fetch('/api/job_service/recommendations_from_pdf', {
+                    method: 'POST',
+                    body: formData
+                }).then(res => res.json()).then(data => {
+                    setVacancies(data);
+                    setLoading(false);
+                });
+            }
+        }catch (error) {
             console.error('Error:', error);
         }
     }, [resume]);

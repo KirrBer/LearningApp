@@ -3,7 +3,7 @@ import logging
 from job_service.settings import settings
 from job_service.models import Vacancy
 from job_service.db import connection
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from api_hhru import get_vacancies_id, get_vacancy
 
 
@@ -15,8 +15,8 @@ DATABASE_URL = settings.get_db_url()
 async def seed_skills_with_models(session):
     """Заполнение навыков используя модели SQLAlchemy"""
     ids = []
-    for i in range(7):
-        ids += get_vacancies_id()
+    for i in range(4):
+        ids += get_vacancies_id(page=i)
     for id in ids:
         query = select(Vacancy).where(Vacancy.id == int(id))
         result = await session.execute(query)

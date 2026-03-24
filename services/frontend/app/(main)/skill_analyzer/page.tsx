@@ -12,6 +12,7 @@ export default function SkillForm() {
   const [skills, setSkills] = useState<Array<Skill>>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [file, setFile] = useState<File | null>(null);
+  const [showVacancies, setShowVacancies] = useState<boolean>(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -30,6 +31,7 @@ export default function SkillForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setShowVacancies(true);
     if (resume){
       try {
       const response = await fetch('/api/skill_analyzer/extract_skills_from_text', {
@@ -74,6 +76,7 @@ export default function SkillForm() {
           onChange={(e) => {
             setResume(e.target.value)
             setSkills([])
+            setShowVacancies(false)
             }
           }
           placeholder="Вставьте текст резюме..."
@@ -142,8 +145,8 @@ export default function SkillForm() {
           </div>
         </div>
       )}
-      {resume && skills?.length > 0 && <Vacancies resume={resume} file={null} />}
-      {file && skills?.length > 0 && <Vacancies file={file} resume={null} />}
+      {showVacancies && resume && <Vacancies resume={resume} file={null} />}
+      {showVacancies && file && <Vacancies file={file} resume={null} />}
     </div>
   );
 }

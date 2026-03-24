@@ -2,7 +2,7 @@ import requests
 
 def get_vacancies_id(page=0):
     url = 'https://api.hh.ru/vacancies'
-    variants = "разработчик OR программист OR аналитик OR it OR developer OR junior OR middle OR senior"
+    variants = "разработчик OR программист OR аналитик OR developer OR junior OR middle OR senior"
     params = {
         'text': variants,
         'per_page': 100,
@@ -25,7 +25,7 @@ def get_vacancy(id):
             'name': data.get('name'),
             'description': data.get('description'),
             'employer': data.get('employer', {}).get('name') if data.get('employer') else 'не указано',
-            'salary': ('от' + str(data.get('salary', {}).get('from')) + ' до' + str(data.get('salary', {}).get('to'))) if data.get('salary') else 'не указано',
+            'salary': ('от ' + str(data.get('salary', {}).get('from')) + ' до' + str(data.get('salary', {}).get('to'))) if data.get('salary') else 'не указано',
             'employment': data.get('employment', {}).get('name') if data.get('employment') else 'не указано',
             'schedule': data.get('schedule', {}).get('name') if data.get('schedule') else 'не указано',
             'experience': data.get('experience', {}).get('name') if data.get('experience') else 'не указано',

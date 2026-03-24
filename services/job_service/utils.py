@@ -3,6 +3,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from db_methods import get_all_vacancies
 from pdftext.extraction import plain_text_output
 import io
+import numpy as np
 
 async def recommendations_sort(resume):
 
@@ -18,9 +19,15 @@ async def recommendations_sort(resume):
     # Вычисляем все пары
     similarities = cosine_similarity(resume_vector, vacancy_vectors)[0]
 
-    sim_with_vac = sorted(list(zip(similarities, vacancies)), key=lambda x: x[0], reverse=True)
-    sorted_vacancies = [vac for _, vac in sim_with_vac]
-    return sorted_vacancies[:50]
+    top_k = 50
+    # argpartition находит top_k наибольших без полной сортировки
+    top_indices = np.argpartition(similarities, -top_k)[-top_k:]
+    # Сортируем только выбранные
+    top_indices = top_indices[np.argsort(similarities[top_indices])[::-1]]
+    
+    sorted_vacancies = [vacancies[i] for i in top_indices]
+    
+    return sorted_vacancies
 
 async def extract_text_from_pdf(file) -> str:
     """Извлекает текст из загруженного PDF файла."""

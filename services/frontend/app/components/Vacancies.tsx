@@ -6,12 +6,8 @@ import { useState, useEffect } from 'react';
 interface Vacancy {
     id: number;
     name: string;
-    description: string;
     employer: string;
     salary: string | null;
-    employment: string | null;
-    schedule: string | null;
-    experience: string | null;
     area: string | null;
 }
 

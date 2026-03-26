@@ -35,3 +35,19 @@ async def get_all_vacancies(session):
     except Exception as e:
         logger.error(f"Ошибка при получении вакансий из БД: {str(e)}")
         raise
+
+@connection
+async def get_vacancy_by_id(id: int, session):
+    try:
+        query = select(Vacancy).filter(Vacancy.id == id)
+        result = await session.execute(query)
+        vacancy = result.scalars().first() 
+        if not vacancy:
+            logger.warning("В БД не найдено вакансий")
+            return None
+        
+        return vacancy
+        
+    except Exception as e:
+        logger.error(f"Ошибка при получении вакансий из БД: {str(e)}")
+        raise

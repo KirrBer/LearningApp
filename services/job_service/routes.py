@@ -5,7 +5,8 @@
 
 from fastapi import APIRouter, Body, File, UploadFile, HTTPException, status
 from job_service.utils import recommendations_sort, extract_text_from_pdf
-from job_service.schemas import ResumeRequest, VacancyResponse
+from job_service.schemas import ResumeRequest, VacancyResponse, ShortVacancyResponse
+from job_service.db_methods import get_vacancy_by_id
 from typing import List
 import logging
 
@@ -15,8 +16,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/recommendations_from_text", summary="Получить список рекомендаций для резюме из текста")
-async def get_recommendations(data: ResumeRequest = Body(...)) -> List[VacancyResponse]:
+@router.post("/recommendations_from_text", summary="Получить список рекомендаций для резюме из текста", response_model=List[ShortVacancyResponse])
+async def get_recommendations(data: ResumeRequest = Body(...)) -> List[ShortVacancyResponse]:
     """
     Получает рекомендации вакансий на основе текста резюме.
     
@@ -67,8 +68,8 @@ async def get_recommendations(data: ResumeRequest = Body(...)) -> List[VacancyRe
         )
 
 
-@router.post("/recommendations_from_pdf", summary="Получить список рекомендаций для резюме из PDF")
-async def get_recommendations_pdf(file: UploadFile = File(...)) -> List[VacancyResponse]:
+@router.post("/recommendations_from_pdf", summary="Получить список рекомендаций для резюме из PDF", response_model=List[ShortVacancyResponse])
+async def get_recommendations_pdf(file: UploadFile = File(...)) -> List[ShortVacancyResponse]:
     """
     Получает рекомендации вакансий на основе загруженного PDF файла.
     
@@ -81,6 +82,14 @@ async def get_recommendations_pdf(file: UploadFile = File(...)) -> List[VacancyR
     Raises:
         HTTPException: При ошибке загрузки, парсинга PDF или обработки БД
     """
+    def long_to_short_vacancy_response(vacancy):
+        return ShortVacancyResponse(
+            id=vacancy.id,
+            name=vacancy.name,
+            employer=vacancy.employer,
+            salary=vacancy.salary,
+            area=vacancy.area
+        )
     try:
         # Валидация типа файла
         if file.content_type != "application/pdf":
@@ -106,13 +115,15 @@ async def get_recommendations_pdf(file: UploadFile = File(...)) -> List[VacancyR
             )
         
         # Получение рекомендаций
-        response = await recommendations_sort(data)
-        
+        sorted_vacancies = await recommendations_sort(data)
+        response = [long_to_short_vacancy_response(v) for v in sorted_vacancies]
         if not response:
             logger.warning("Не найдены вакансии для загруженного PDF")
             return []
         
         return response
+
+
         
     except HTTPException:
         raise
@@ -129,6 +140,16 @@ async def get_recommendations_pdf(file: UploadFile = File(...)) -> List[VacancyR
             detail="Ошибка при обработке PDF файла. Пожалуйста, попробуйте позже"
         )
 
+
+@router.get("/vacancies/{id}", summary="Получить вакансию по id", response_model=VacancyResponse)
+async def get_vacancy(id) -> VacancyResponse:
+    vacancy = await get_vacancy_by_id(int(id))
+    if vacancy is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Вакансия не найдена"
+        )
+    return vacancy
 
 @router.get("/health", summary="Проверка статуса сервиса")
 def health():

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
 interface Vacancy {
@@ -48,7 +49,7 @@ export function Vacancies({ resume, file }: VacanciesProps) {
         }catch (error) {
             console.error('Error:', error);
         }
-    }, [resume]);
+    }, [resume, file]);
 
     if (loading) return <div className="text-center py-8">Loading...</div>;
 
@@ -58,14 +59,14 @@ export function Vacancies({ resume, file }: VacanciesProps) {
             {vacancies &&
                 <div className="grid gap-4">
                     {vacancies.map(vacancy => (
-                    <div key={vacancy.id} className="border rounded-lg p-4 hover:shadow-md">
+                    <Link href={`/vacancies/${vacancy.id}`} key={vacancy.id} className="border rounded-lg p-4 hover:shadow-md">
                         <h2 className="text-xl font-semibold">{vacancy.name}</h2>
                         <p className="text-gray-600">Работодатель: {vacancy.employer}</p>
                         <div className="flex gap-4 mt-2 text-sm text-gray-500">
                             <span>Адрес: {vacancy.area}</span>
                             <span>Зарплата: {vacancy.salary}</span>
                         </div>
-                    </div>
+                    </Link>
                     ))}
                 </div>
             }

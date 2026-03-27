@@ -105,6 +105,8 @@ export default async function VacancyPage({ params }: { params: Promise<{ id: st
                             <Link
                                 key={similar.id}
                                 href={`/vacancies/${similar.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="block bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-200 hover:border-blue-300"
                             >
                                 <h3 className="font-semibold text-lg mb-1 line-clamp-2">

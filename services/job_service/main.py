@@ -10,6 +10,8 @@ from fastapi.exceptions import RequestValidationError
 from .routes import router
 import logging
 import traceback
+from contextlib import asynccontextmanager
+from job_service.threadpool import threadpool_manager
 
 # Настройка логирования
 logging.basicConfig(
@@ -19,10 +21,20 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+
+    threadpool_manager.create()
+
+    yield
+
+    threadpool_manager.stop()
+
 app = FastAPI(
     title="Job Service",
     description="API сервис для поиска вакансий по резюме",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Подключаем маршруты из модуля routes.py

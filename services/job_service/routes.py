@@ -9,6 +9,7 @@ from job_service.schemas import ResumeRequest, VacancyResponse, ShortVacancyResp
 from job_service.db_methods import get_vacancy_by_id
 from typing import List
 import logging
+from job_service.threadpool import threadpool_manager
 
 # Настройка логирования
 logger = logging.getLogger(__name__)

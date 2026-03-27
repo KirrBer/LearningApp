@@ -130,6 +130,8 @@ export default function SkillForm() {
                 key={i}
                 className="bg-red-300 px-3 py-1 rounded-full text-sm"
                 href={skill.course}
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 {skill.name}
               </a>

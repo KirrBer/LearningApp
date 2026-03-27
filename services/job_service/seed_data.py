@@ -23,6 +23,9 @@ async def seed_skills_with_models(session):
         existing = result.scalar_one_or_none()
         if not existing:
             vacancy_data = get_vacancy(id)
+            if not vacancy_data:
+                logger.warning(f"Вакансия с id {id} не найдена через API")
+                continue
             vacancy = Vacancy(**vacancy_data)
             session.add(vacancy)
             await session.commit()

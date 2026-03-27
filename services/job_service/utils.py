@@ -5,6 +5,7 @@ from pdftext.extraction import plain_text_output
 import io
 import numpy as np
 import logging
+from job_service.threadpool import threadpool_manager
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ async def recommendations_sort(resume: str):
         try:
             vectorizer = TfidfVectorizer(max_features=5000, stop_words='english')
             all_texts = [resume] + [vacancy.description for vacancy in vacancies]
-            tfidf_matrix = vectorizer.fit_transform(all_texts)
+            tfidf_matrix = await threadpool_manager.run_in_custom_threadpool(vectorizer.fit_transform, all_texts)
         except Exception as e:
             logger.error(f"Ошибка при векторизации текста: {str(e)}")
             raise ValueError(f"Не удалось обработать текст резюме: {str(e)}")
@@ -47,7 +48,8 @@ async def recommendations_sort(resume: str):
 
         # Вычисляем все пары
         try:
-            similarities = cosine_similarity(resume_vector, vacancy_vectors)[0]
+            similarities = await threadpool_manager.run_in_custom_threadpool(cosine_similarity, resume_vector, vacancy_vectors)
+            similarities = similarities[0]
         except Exception as e:
             logger.error(f"Ошибка при вычислении сходимости: {str(e)}")
             raise ValueError(f"Ошибка при анализе релевантности: {str(e)}")

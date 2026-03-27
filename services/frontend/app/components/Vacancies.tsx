@@ -55,7 +55,12 @@ export function Vacancies({ resume, file }: VacanciesProps) {
             {vacancies &&
                 <div className="grid gap-4">
                     {vacancies.map(vacancy => (
-                    <Link href={`/vacancies/${vacancy.id}`} key={vacancy.id} className="border rounded-lg p-4 hover:shadow-md">
+                    <Link href={`/vacancies/${vacancy.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        key={vacancy.id} 
+                        className="border rounded-lg p-4 hover:shadow-md"
+                    >
                         <h2 className="text-xl font-semibold">{vacancy.name}</h2>
                         <p className="text-gray-600">Работодатель: {vacancy.employer}</p>
                         <div className="flex gap-4 mt-2 text-sm text-gray-500">

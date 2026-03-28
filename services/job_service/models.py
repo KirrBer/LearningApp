@@ -1,5 +1,4 @@
 from job_service.db import Base, str_null_true, int_pk
-from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 class Vacancy(Base):

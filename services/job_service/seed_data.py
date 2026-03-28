@@ -4,7 +4,7 @@ from job_service.settings import settings
 from job_service.models import Vacancy
 from job_service.db import connection
 from sqlalchemy import select, delete
-from api_hhru import get_vacancies_id, get_vacancy
+from job_service.api_hhru import get_vacancies_id, get_vacancy
 
 
 logger = logging.getLogger(__name__)

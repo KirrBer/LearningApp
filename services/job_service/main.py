@@ -7,7 +7,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
-from .routes import router
+from job_service.routes import router
 import logging
 import traceback
 from contextlib import asynccontextmanager

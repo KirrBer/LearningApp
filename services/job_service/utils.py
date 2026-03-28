@@ -1,6 +1,6 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from db_methods import get_all_vacancies
+from job_service.db_methods import get_all_vacancies
 from pdftext.extraction import plain_text_output
 import io
 import numpy as np

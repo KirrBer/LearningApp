@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Vacancies } from '@/app/components/Vacancies';
 
 // Страница Skill Analyzer: позволяет вставить текст резюме или загрузить PDF.
 // Далее отправляет данные в backend и отображает найденные навыки + курсы.
@@ -11,6 +12,7 @@ export default function SkillForm() {
   const [skills, setSkills] = useState<Array<Skill>>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [file, setFile] = useState<File | null>(null);
+  const [showVacancies, setShowVacancies] = useState<boolean>(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -29,6 +31,7 @@ export default function SkillForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setShowVacancies(true);
     if (resume){
       try {
       const response = await fetch('/api/skill_analyzer/extract_skills_from_text', {
@@ -70,7 +73,12 @@ export default function SkillForm() {
         {!file && (
         <textarea
           value={resume}
-          onChange={(e) => setResume(e.target.value)}
+          onChange={(e) => {
+            setResume(e.target.value)
+            setSkills([])
+            setShowVacancies(false)
+            }
+          }
           placeholder="Вставьте текст резюме..."
           className="w-full h-64 p-4 border rounded-lg focus:ring-2 focus:ring-blue-500"
         />
@@ -122,6 +130,8 @@ export default function SkillForm() {
                 key={i}
                 className="bg-red-300 px-3 py-1 rounded-full text-sm"
                 href={skill.course}
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 {skill.name}
               </a>
@@ -137,6 +147,8 @@ export default function SkillForm() {
           </div>
         </div>
       )}
+      {showVacancies && resume && <Vacancies resume={resume} file={null} />}
+      {showVacancies && file && <Vacancies file={file} resume={null} />}
     </div>
   );
 }

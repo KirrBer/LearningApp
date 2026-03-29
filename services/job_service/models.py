@@ -1,5 +1,4 @@
 from job_service.db import Base, str_null_true, int_pk
-from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 class Vacancy(Base):
@@ -11,5 +10,5 @@ class Vacancy(Base):
     salary: Mapped[str_null_true]
     employment: Mapped[str_null_true]
     schedule: Mapped[str_null_true]
-    expirience: Mapped[str_null_true]
+    experience: Mapped[str_null_true]
     area: Mapped[str_null_true]

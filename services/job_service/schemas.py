@@ -16,6 +16,11 @@ class VacancyResponse(BaseModel):
     experience: str | None
     area: str | None
 
+class VacancyListResponse(BaseModel):
+    vacancies: list[VacancyResponse]
+    currentPage: int
+    totalPages: int
+
 
 class ShortVacancyResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

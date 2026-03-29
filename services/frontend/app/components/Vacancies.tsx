@@ -51,7 +51,7 @@ export function Vacancies({ resume, file }: VacanciesProps) {
 
     return (
         <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-6">Вакансии</h1>
+            <h1 className="text-2xl text-gray-900 font-bold mb-6">Вакансии</h1>
             {vacancies &&
                 <div className="grid gap-4">
                     {vacancies.map(vacancy => (
@@ -61,11 +61,13 @@ export function Vacancies({ resume, file }: VacanciesProps) {
                         key={vacancy.id} 
                         className="border rounded-lg p-4 hover:shadow-md"
                     >
-                        <h2 className="text-xl font-semibold">{vacancy.name}</h2>
-                        <p className="text-gray-600">Работодатель: {vacancy.employer}</p>
-                        <div className="flex gap-4 mt-2 text-sm text-gray-500">
-                            <span>Адрес: {vacancy.area}</span>
-                            <span>Зарплата: {vacancy.salary}</span>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                            {vacancy.name}
+                        </h2>
+                        <p className="text-gray-600 mb-2">{vacancy.employer}</p>
+                        <div className="flex gap-4 text-sm text-gray-500">
+                            <span>{vacancy.area}</span>
+                            <span className="font-medium text-green-600">{vacancy.salary}</span>
                         </div>
                     </Link>
                     ))}

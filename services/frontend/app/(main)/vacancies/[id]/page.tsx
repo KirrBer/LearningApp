@@ -43,7 +43,7 @@ async function getVacancy(id: string): Promise<Vacancy> {
 }
 
 async function getSimilarVacancies(text: string): Promise<VacancyShort[]> {
-    const baseUrl = process.env.PUBLIC_URL || 'http://nginx:80';
+    const baseUrl = 'http://nginx:80';
     
     try {
         const res = await fetch(`${baseUrl}/api/job_service/recommendations_from_text`, {

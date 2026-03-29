@@ -5,8 +5,8 @@
 
 from fastapi import APIRouter, Body, File, UploadFile, HTTPException, status
 from job_service.utils import recommendations_sort, extract_text_from_pdf
-from job_service.schemas import ResumeRequest, VacancyResponse, ShortVacancyResponse
-from job_service.db_methods import get_vacancy_by_id
+from job_service.schemas import ResumeRequest, VacancyListResponse, VacancyResponse, ShortVacancyResponse
+from job_service.db_methods import get_vacancy_by_id, get_all_vacancies
 from typing import List
 import logging
 from job_service.threadpool import threadpool_manager
@@ -151,6 +151,35 @@ async def get_vacancy(id) -> VacancyResponse:
             detail="Вакансия не найдена"
         )
     return vacancy
+
+@router.get("/vacancies", summary="Получить все вакансии", response_model=VacancyListResponse)
+async def get_vacancies(page) -> VacancyListResponse:
+    try:
+        page = int(page)
+        vacancies = await get_all_vacancies()
+        total_pages = (len(vacancies) + 9) // 10  # Calculate total pages (10 items per page)
+        if page < 1 or (page-1)*10 >= len(vacancies):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Неверный номер страницы"
+            )
+        vacancies = vacancies[(page-1)*10:page*10]
+        if not vacancies:
+            logger.warning("В БД не найдено вакансий")
+            return []
+        return VacancyListResponse(
+            vacancies=vacancies,
+            currentPage=page,
+            totalPages=total_pages
+        )
+    except Exception as e:
+        logger.error(f"Ошибка при получении вакансий: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Ошибка при получении вакансий. Пожалуйста, попробуйте позже"
+        )
+
+
 
 @router.get("/health", summary="Проверка статуса сервиса")
 def health():

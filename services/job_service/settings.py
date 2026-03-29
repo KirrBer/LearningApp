@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = 'postgres'
     POSTGRES_PASSWORD: str = 'postgres'
     DB_HOST: str = 'localhost'
-    DB_PORT: int = '5432'
+    DB_PORT: int = 5432
     POSTGRES_DB: str = 'vacancies'
     PGDATA: str = 'pgdata:/var/lib/postgresql/data'
 

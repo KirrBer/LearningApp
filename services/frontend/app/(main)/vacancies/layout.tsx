@@ -38,56 +38,53 @@ export default function VacanciesLayout({
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Заголовок */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Вакансии
-          </h1>
-          <p className="text-gray-600">
-            Найдите идеальную работу или получите персональные рекомендации
-          </p>
-        </div>
+    <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Заголовок */}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          Вакансии
+        </h1>
+        <p className="text-gray-600">
+          Найдите идеальную работу или получите персональные рекомендации
+        </p>
+      </div>
 
-        {/* Табы */}
-        <div className="mb-8">
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8" aria-label="Tabs">
-              {tabs.map((tab) => {
-                const isActive = pathname === tab.href;
-                return (
-                  <Link
-                    key={tab.href}
-                    href={tab.href}
-                    className={`
-                      group inline-flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 transition-all duration-200
-                      ${isActive
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      }
-                    `}
-                  >
-                    {tab.icon}
-                    <span>{tab.name}</span>
-                    {isActive && (
-                      <span className="ml-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-600 rounded-full">
-                        Активно
-                      </span>
-                    )}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-        </div>
-
-        {/* Контент */}
-        <div className="animate-fadeIn">
-          {children}
+      {/* Табы */}
+      <div className="mb-8">
+        <div className="border-b border-gray-200">
+          <nav className="flex space-x-8" aria-label="Tabs">
+            {tabs.map((tab) => {
+              const isActive = pathname === tab.href;
+              return (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  className={`
+                    group inline-flex items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 transition-all duration-200
+                    ${isActive
+                      ? 'border-blue-600 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }
+                  `}
+                >
+                  {tab.icon}
+                  <span>{tab.name}</span>
+                  {isActive && (
+                    <span className="ml-1 px-2 py-0.5 text-xs bg-blue-100 text-blue-600 rounded-full">
+                      Активно
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
       </div>
 
+      {/* Контент */}
+      <div className="animate-fadeIn">
+        {children}
+      </div>
     </div>
   );
 }

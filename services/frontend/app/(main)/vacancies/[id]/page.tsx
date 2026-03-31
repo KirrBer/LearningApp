@@ -102,32 +102,34 @@ export default async function VacancyPage({ params }: { params: Promise<{ id: st
                     <h2 className="text-2xl font-bold mb-4">Похожие вакансии</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {similarVacancies.map((similar) => (
-                            <Link
-                                key={similar.id}
-                                href={`/vacancies/${similar.id}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-200 hover:border-blue-300"
-                            >
-                                <h3 className="font-semibold text-lg mb-1 line-clamp-2">
-                                    {similar.name}
-                                </h3>
-                                <p className="text-sm text-gray-600 mb-2">{similar.employer}</p>
-                                
-                                <div className="flex justify-between items-center text-sm">
-                                    {similar.salary ? (
-                                        <span className="text-green-600 font-medium">
-                                            {similar.salary} ₽
-                                        </span>
-                                    ) : (
-                                        <span className="text-gray-400">з/п не указана</span>
-                                    )}
+                            Number(id) !== similar.id && (
+                                <Link
+                                    key={similar.id}
+                                    href={`/vacancies/${similar.id}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-200 hover:border-blue-300"
+                                >
+                                    <h3 className="font-semibold text-lg mb-1 line-clamp-2">
+                                        {similar.name}
+                                    </h3>
+                                    <p className="text-sm text-gray-600 mb-2">{similar.employer}</p>
                                     
-                                    {similar.area && (
-                                        <span className="text-gray-500">{similar.area}</span>
-                                    )}
-                                </div>
-                            </Link>
+                                    <div className="flex justify-between items-center text-sm">
+                                        {similar.salary ? (
+                                            <span className="text-green-600 font-medium">
+                                                {similar.salary} ₽
+                                            </span>
+                                        ) : (
+                                            <span className="text-gray-400">з/п не указана</span>
+                                        )}
+                                        
+                                        {similar.area && (
+                                            <span className="text-gray-500">{similar.area}</span>
+                                        )}
+                                    </div>
+                                </Link>
+                            )
                         ))}
                     </div>
                 </div>

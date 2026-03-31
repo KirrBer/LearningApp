@@ -1,6 +1,6 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from job_service.db_methods import get_all_vacancies
+from job_service.db_methods import get_vacancies_from_db
 from pdftext.extraction import plain_text_output
 import io
 import numpy as np
@@ -26,7 +26,7 @@ async def recommendations_sort(resume: str):
     """
     try:
         # Получение вакансий из БД
-        vacancies = await get_all_vacancies()
+        vacancies = await get_vacancies_from_db()
         
         if not vacancies:
             logger.warning("Не найдено вакансий в БД")

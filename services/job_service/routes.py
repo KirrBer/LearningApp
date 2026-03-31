@@ -6,7 +6,7 @@
 from fastapi import APIRouter, Body, File, UploadFile, HTTPException, status
 from job_service.utils import recommendations_sort, extract_text_from_pdf
 from job_service.schemas import ResumeRequest, VacancyListResponse, VacancyResponse, ShortVacancyResponse
-from job_service.db_methods import get_vacancy_by_id, get_all_vacancies
+from job_service.db_methods import get_vacancy_by_id, get_vacancies_from_db, get_number
 from typing import List
 import logging
 from job_service.threadpool import threadpool_manager
@@ -156,14 +156,14 @@ async def get_vacancy(id) -> VacancyResponse:
 async def get_vacancies(page) -> VacancyListResponse:
     try:
         page = int(page)
-        vacancies = await get_all_vacancies()
-        total_pages = (len(vacancies) + 9) // 10  # Calculate total pages (10 items per page)
-        if page < 1 or (page-1)*10 >= len(vacancies):
+        number_of_vacancies = await get_number()
+        vacancies = await get_vacancies_from_db(start=(page-1)*10, num=10)
+        total_pages = (number_of_vacancies + 9) // 10  # Calculate total pages (10 items per page)
+        if page < 1 or (page-1)*10 >= number_of_vacancies:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Неверный номер страницы"
             )
-        vacancies = vacancies[(page-1)*10:page*10]
         if not vacancies:
             logger.warning("В БД не найдено вакансий")
             return []

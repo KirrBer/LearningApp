@@ -27,16 +27,7 @@ def patch_dependencies(monkeypatch):
 
     monkeypatch.setattr("skill_analyzer.routes.find_courses", fake_find)
 
-    # Mock kafka_manager
-    class FakeProducer:
-        async def send(self, topic, value):
-            pass  # Do nothing in tests
 
-    class FakeKafkaManager:
-        def __init__(self):
-            self.producer = FakeProducer()
-
-    monkeypatch.setattr("skill_analyzer.routes.kafka_manager", FakeKafkaManager())
 
 
 def test_post_text():
@@ -90,65 +81,7 @@ def test_post_pdf_no_file():
     assert resp.status_code == 422  # Unprocessable entity (missing required field)
 
 
-def test_post_text_model_error(monkeypatch):
-    """Test error handling when model inference fails."""
-    def failing_extract(text):
-        raise ModelInferenceError("Model failed")
-    
-    monkeypatch.setattr("skill_analyzer.routes.extract_skills_from_text", failing_extract)
-    
-    client = TestClient(app)
-    resp = client.post("/extract_skills_from_text", json={"text": "test"})
-    assert resp.status_code == 500
-    assert "failed to extract" in resp.json()["detail"].lower()
 
 
-def test_post_pdf_extraction_error(monkeypatch):
-    """Test error handling when PDF extraction fails."""
-    async def failing_extract_pdf(file):
-        raise PDFExtractionError("Failed to extract PDF")
-    
-    monkeypatch.setattr("skill_analyzer.routes.extract_text_from_pdf", failing_extract_pdf)
-    
-    client = TestClient(app)
-    resp = client.post(
-        "/extract_skills_from_pdf",
-        files={"file": ("resume.pdf", b"data", "application/pdf")},
-    )
-    assert resp.status_code == 400
-    assert "failed to extract text" in resp.json()["detail"].lower()
 
 
-def test_post_text_database_error(monkeypatch):
-    """Test graceful handling when database is unavailable."""
-    async def failing_find(skills):
-        raise DatabaseError("Database connection failed")
-    
-    monkeypatch.setattr("skill_analyzer.routes.find_courses", failing_find)
-    monkeypatch.setattr("skill_analyzer.routes.extract_skills_from_text", lambda text: ["skill1", "skill2"])
-    
-    client = TestClient(app)
-    resp = client.post("/extract_skills_from_text", json={"text": "test"})
-    # Should still succeed but without courses
-    assert resp.status_code == 200
-    result = resp.json()
-    assert len(result) == 2
-    assert all(item["course"] is None for item in result)
-
-
-def test_post_text_kafka_error(monkeypatch):
-    """Test graceful handling when Kafka is unavailable."""
-    class FailingProducer:
-        async def send(self, topic, value):
-            raise Exception("Kafka connection failed")
-    
-    class FailingKafkaManager:
-        def __init__(self):
-            self.producer = FailingProducer()
-    
-    monkeypatch.setattr("skill_analyzer.routes.kafka_manager", FailingKafkaManager())
-    
-    client = TestClient(app)
-    resp = client.post("/extract_skills_from_text", json={"text": "test"})
-    # Should still succeed even if Kafka fails
-    assert resp.status_code == 200

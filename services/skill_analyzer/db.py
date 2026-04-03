@@ -9,12 +9,15 @@
 
 from datetime import datetime
 from typing import Annotated
+import logging
 
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column
 from skill_analyzer.settings import settings
+from skill_analyzer.exceptions import DatabaseError
 
+logger = logging.getLogger(__name__)
 
 DATABASE_URL = settings.get_db_url()
 engine = create_async_engine(DATABASE_URL)
@@ -25,18 +28,29 @@ def connection(method):
     """Декоратор для выполнения функции в контексте DB-сессии.
 
     Позволяет не передавать сессию явно, упрощает работу с async SQLAlchemy.
+    Обрабатывает ошибки и откатывает сессию при необходимости.
+    
+    Raises:
+        DatabaseError: If database operation fails
     """
 
     async def wrapper(*args, **kwargs):
-        async with async_session_maker() as session:
-            try:
-                # Явно не открываем транзакции, так как они уже есть в контексте
-                return await method(*args, session=session, **kwargs)
-            except Exception as e:
-                await session.rollback()  # Откатываем сессию при ошибке
-                raise e  # Поднимаем исключение дальше
-            finally:
-                await session.close()  # Закрываем сессию
+        session = await async_session_maker()
+        try:
+            logger.debug(f"Executing database operation: {method.__name__}")
+            result = await method(*args, session=session, **kwargs)
+            await session.commit()
+            return result
+        except DatabaseError:
+            # Re-raise our own exceptions
+            await session.rollback()
+            raise
+        except Exception as e:
+            logger.error(f"Database error in {method.__name__}: {str(e)}")
+            await session.rollback()
+            raise DatabaseError(f"Database operation failed: {str(e)}")
+        finally:
+            await session.close()
 
     return wrapper
 

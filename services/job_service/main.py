@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    threadpool_manager.stop()
+    await threadpool_manager.stop()
 
 app = FastAPI(
     title="Job Service",

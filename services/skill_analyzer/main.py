@@ -10,11 +10,10 @@
 from fastapi import FastAPI
 from skill_analyzer.routes import router
 from skill_analyzer.model_manager import model_manager
-from skill_analyzer.kafka import kafka_manager
 from contextlib import asynccontextmanager
 import logging
 from skill_analyzer.threadpool import threadpool_manager
-from skill_analyzer.exceptions import ModelLoadingError, KafkaConnectionError, ThreadPoolError
+from skill_analyzer.exceptions import ModelLoadingError, ThreadPoolError
 
 logging.basicConfig(
     level=logging.INFO,
@@ -36,15 +35,7 @@ async def lifespan(app: FastAPI):
         raise
 
     # Запускаем Kafka producer/consumer.
-    try:
-        await kafka_manager.start()
-        logger.info("✅ Kafka started successfully")
-    except KafkaConnectionError as e:
-        logger.error(f"❌ Failed to connect to Kafka: {str(e)}")
-        raise
-    except Exception as e:
-        logger.error(f"❌ Unexpected error during Kafka startup: {str(e)}")
-        raise
+
 
     # Создаем threadpool
     try:
@@ -65,12 +56,6 @@ async def lifespan(app: FastAPI):
         logger.info("✅ Models unloaded successfully")
     except Exception as e:
         logger.error(f"❌ Error unloading models: {str(e)}")
-
-    try:
-        await kafka_manager.stop()
-        logger.info("✅ Kafka stopped successfully")
-    except Exception as e:
-        logger.error(f"❌ Error stopping Kafka: {str(e)}")
 
     try:
         threadpool_manager.stop()

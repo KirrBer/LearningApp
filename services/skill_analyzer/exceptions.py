@@ -21,19 +21,6 @@ class PDFExtractionError(SkillAnalyzerException):
     pass
 
 
-class KafkaError(SkillAnalyzerException):
-    """Base exception for Kafka-related errors."""
-    pass
-
-
-class KafkaConnectionError(KafkaError):
-    """Raised when Kafka connection fails."""
-    pass
-
-
-class KafkaMessageError(KafkaError):
-    """Raised when Kafka message processing fails."""
-    pass
 
 
 class DatabaseError(SkillAnalyzerException):

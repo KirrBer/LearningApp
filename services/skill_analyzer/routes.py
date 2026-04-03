@@ -7,14 +7,12 @@
 from fastapi import APIRouter, Body, File, UploadFile, HTTPException, status
 from skill_analyzer.utils import extract_skills_from_text, extract_text_from_pdf, find_courses
 from skill_analyzer.schemas import TextRequest, SkillResponse
-from skill_analyzer.kafka import kafka_manager
 from typing import List
 from skill_analyzer.threadpool import threadpool_manager
 from skill_analyzer.exceptions import (
     PDFExtractionError, 
     ModelInferenceError, 
-    DatabaseError, 
-    KafkaMessageError
+    DatabaseError
 )
 import logging
 
@@ -65,15 +63,6 @@ async def get_skills(data: TextRequest = Body(...)) -> List[SkillResponse]:
             logger.error(f"Unexpected error during course lookup: {str(e)}")
             response = [{"name": skill, "course": None} for skill in skills]
 
-        # Публикуем результат в Kafka для последующей обработки или аналитики.
-        try:
-            await kafka_manager.producer.send('extraction_results', value={"text": data.text, "skills": skills})
-        except KafkaMessageError as e:
-            logger.error(f"Kafka publish error: {str(e)}")
-            # Не прерываем процесс если Kafka недоступна, просто логируем ошибку
-        except Exception as e:
-            logger.error(f"Unexpected error during Kafka publish: {str(e)}")
-            # Не прерываем процесс если Kafka недоступна
         
         return response
     
@@ -164,13 +153,6 @@ async def get_skills_from_pdf(file: UploadFile = File(...)) -> List[SkillRespons
             logger.error(f"Unexpected error during course lookup: {str(e)}")
             response = [{"name": skill, "course": None} for skill in skills]
 
-        try:
-            await kafka_manager.producer.send('extraction_results', value={"pdf_file": file.filename, "skills": skills})
-        except KafkaMessageError as e:
-            logger.error(f"Kafka publish error: {str(e)}")
-        except Exception as e:
-            logger.error(f"Unexpected error during Kafka publish: {str(e)}")
-        
         return response
     
     except HTTPException:

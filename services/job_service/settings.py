@@ -7,12 +7,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    DB_HOST: str
-    DB_PORT: int
-    POSTGRES_DB: str
-    PGDATA: str
+    POSTGRES_USER: str = 'postgres'
+    POSTGRES_PASSWORD: str = 'postgres'
+    DB_HOST: str = 'localhost'
+    DB_PORT: int = 5432
+    POSTGRES_DB: str = 'vacancies'
+    PGDATA: str = 'pgdata:/var/lib/postgresql/data'
 
     model_config = SettingsConfigDict(
         env_file=".env",

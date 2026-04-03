@@ -1,11 +1,12 @@
 import requests
 
-def get_vacancies_id(text='', per_page=100, professional_role=11):
+def get_vacancies_id(page=0):
     url = 'https://api.hh.ru/vacancies'
+    variants = "разработчик OR программист OR аналитик OR developer OR junior OR middle OR senior"
     params = {
-        'text': text,
-        'per_page': per_page,
-        'professional_role': professional_role
+        'text': variants,
+        'per_page': 100,
+        'page': page
     }
     response = requests.get(url, params=params)
     if response.status_code == 200:
@@ -20,15 +21,15 @@ def get_vacancy(id):
     if response.status_code == 200:
         data = response.json()
         return {
-            'id': data.get('id'),
+            'id': int(data.get('id')),
             'name': data.get('name'),
             'description': data.get('description'),
-            'employer': data.get('employer', {}).get('name'),
-            'salary': data.get('salary'),
-            'employment': data.get('employment', {}).get('name'),
-            'schedule': data.get('schedule', {}).get('name'),
-            'experience': data.get('experience', {}).get('name'),
-            'area': data.get('area', {}).get('name')
+            'employer': data.get('employer', {}).get('name') if data.get('employer') else 'не указано',
+            'salary': ('от ' + str(data.get('salary', {}).get('from')) + ' до' + str(data.get('salary', {}).get('to'))) if data.get('salary') else 'не указано',
+            'employment': data.get('employment', {}).get('name') if data.get('employment') else 'не указано',
+            'schedule': data.get('schedule', {}).get('name') if data.get('schedule') else 'не указано',
+            'experience': data.get('experience', {}).get('name') if data.get('experience') else 'не указано',
+            'area': data.get('area', {}).get('name') if data.get('area') else 'не указано'
         }
     else:
         print(f"Ошибка {response.status_code}")

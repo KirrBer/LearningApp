@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from skill_analyzer.main import app
+from skill_analyzer.exceptions import ModelInferenceError, PDFExtractionError, DatabaseError
 
 
 @pytest.fixture(autouse=True)
@@ -26,16 +27,7 @@ def patch_dependencies(monkeypatch):
 
     monkeypatch.setattr("skill_analyzer.routes.find_courses", fake_find)
 
-    # Mock kafka_manager
-    class FakeProducer:
-        async def send(self, topic, value):
-            pass  # Do nothing in tests
 
-    class FakeKafkaManager:
-        def __init__(self):
-            self.producer = FakeProducer()
-
-    monkeypatch.setattr("skill_analyzer.routes.kafka_manager", FakeKafkaManager())
 
 
 def test_post_text():
@@ -53,3 +45,43 @@ def test_post_pdf():
     )
     assert resp.status_code == 200
     assert resp.json() == [{"name": "x", "course": None}]
+
+
+# Exception handling tests
+def test_post_text_with_empty_text():
+    """Test error handling for empty text input."""
+    client = TestClient(app)
+    resp = client.post("/extract_skills_from_text", json={"text": ""})
+    assert resp.status_code == 400
+    assert "cannot be empty" in resp.json()["detail"].lower()
+
+
+def test_post_text_with_whitespace_only():
+    """Test error handling for whitespace-only text."""
+    client = TestClient(app)
+    resp = client.post("/extract_skills_from_text", json={"text": "   \n  \t  "})
+    assert resp.status_code == 400
+
+
+def test_post_pdf_with_invalid_content_type(monkeypatch):
+    """Test error handling for non-PDF files."""
+    client = TestClient(app)
+    resp = client.post(
+        "/extract_skills_from_pdf",
+        files={"file": ("document.txt", b"data", "text/plain")},
+    )
+    assert resp.status_code == 400
+    assert "pdf" in resp.json()["detail"].lower()
+
+
+def test_post_pdf_no_file():
+    """Test error handling when no file is provided."""
+    client = TestClient(app)
+    resp = client.post("/extract_skills_from_pdf")
+    assert resp.status_code == 422  # Unprocessable entity (missing required field)
+
+
+
+
+
+

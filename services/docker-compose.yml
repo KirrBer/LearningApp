@@ -5,7 +5,7 @@
 #   * skill_analyzer — сервис/ML-пайплайн для извлечения навыков
 #   * job_service   — API для вакансий
 #   * kafka         — брокер сообщений (используется skill_analyzer)
-#
+#   * auth          - сервис авторизации
 # Настройки берутся из файла services/.env (см. README.md)
 
 services:
@@ -101,12 +101,44 @@ services:
       - kafka-data:/var/lib/kafka/data
     networks:
       - default
+  auth_service:
+    build: ./auth_service
+    depends_on:
+      - auth_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: auth_db
+      DB_HOST: auth_db
+      SECRET_KEY: ${AUTH_SECRET_KEY}
+    ports:
+      - "8002:8000"
+    networks:
+      - default
+    restart: unless-stopped
+
+  auth_db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: auth_db
+    volumes:
+      - auth_pgdata:/var/lib/postgresql
+    ports:
+      - "5434:5432"
+    restart: unless-stopped
+    networks:
+      - default
+
 volumes:
   pgdata_sa:
     driver: local
   pgdata_js:
     driver: local
   kafka-data:
+    driver: local
+  auth_pgdata:
     driver: local
 networks:
   default:

@@ -7,13 +7,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    DB_HOST: str
-    DB_PORT: int
-    POSTGRES_DB: str
-    PGDATA: str
-    KAFKA_BOOTSTRAP_SERVERS: str
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = "password"
+    DB_HOST: str = "localhost"
+    DB_PORT: int = 5432
+    POSTGRES_DB: str = "skills"
+    PGDATA: str = "/var/lib/postgresql/data/pgdata"
 
     model_config = SettingsConfigDict(
         env_file=".env",

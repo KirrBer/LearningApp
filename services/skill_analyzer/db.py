@@ -35,12 +35,12 @@ def connection(method):
     """
 
     async def wrapper(*args, **kwargs):
-        session = await async_session_maker()
         try:
-            logger.debug(f"Executing database operation: {method.__name__}")
-            result = await method(*args, session=session, **kwargs)
-            await session.commit()
-            return result
+            async with async_session_maker() as session:
+                logger.debug(f"Executing database operation: {method.__name__}")
+                result = await method(*args, session=session, **kwargs)
+                await session.commit()
+                return result
         except DatabaseError:
             # Re-raise our own exceptions
             await session.rollback()

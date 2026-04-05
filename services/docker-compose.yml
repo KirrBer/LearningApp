@@ -6,6 +6,7 @@
 #   * job_service   — API для вакансий
 #   * kafka         — брокер сообщений (используется skill_analyzer)
 #   * auth          - сервис авторизации
+#   * gateway       - HTTP gateway сервис
 # Настройки берутся из файла services/.env (см. README.md)
 
 services:
@@ -109,6 +110,14 @@ services:
       - auth_pgdata:/var/lib/postgresql
     ports:
       - "5434:5432"
+    restart: unless-stopped
+    networks:
+      - default
+
+  gateway_service:
+    build: ./gateway_service
+    ports:
+      - "8003:8000"
     restart: unless-stopped
     networks:
       - default

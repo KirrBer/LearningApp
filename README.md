@@ -40,6 +40,14 @@ LearningApp/
 │   │   ├── threadpool.py     # Менеджер фоновых задач
 │   │   ├── seed_data.py      # Заполняет БД данными при запуске сервиса
 │   │   └── tests/            # Unit-тесты
+│   ├── auth_service/         # Сервис авторизации: регистрация, вход, JWT
+│   │   ├── main.py           # API и маршруты авторизации
+│   │   ├── auth.py           # Хелперы для хеширования паролей и JWT
+│   │   ├── models.py         # SQLAlchemy модели пользователей и токенов
+│   │   ├── schemas.py        # Pydantic схемы запросов/ответов
+│   │   ├── settings.py       # Настройки PostgreSQL и JWT (env)
+│   │   ├── db.py             # ORM, сессии, настройки БД
+│   │   └── requirements.txt  # Зависимости Python
 │   ├── docker-compose.yml    # Docker Compose конфигурация
 │   └── nginx.conf            # Nginx конфигурация
 └── README.md                  # Этот файл
@@ -53,6 +61,7 @@ LearningApp/
 - **SQLAlchemy** - ORM для работы с БД
 - **Alembic** - управление миграциями БД
 - **Pytest** - тестирование
+- **JWT** - авторизация и аутентификация с помощью JWT токенов
 
 ### ML
 - **spaCy** - NER модель для извлечения сущностей
@@ -83,12 +92,12 @@ POSTGRES_USER=your_username
 POSTGRES_PASSWORD=your_password
 PGDATA=pgdata:/var/lib/postgresql/data
 DB_PORT=5432
-KAFKA_BOOTSTRAP_SERVERS=kafka:9092
 
 DB_HOST_SA=skill_analyzer_db
 POSTGRES_DB_SA=skills
 DB_HOST_JS=job_service_db
 POSTGRES_DB_JS=vacancies
+AUTH_SECRET_KEY=your_secret_key
 ```
 
 ### 2. Запуск приложения
@@ -132,6 +141,38 @@ uvicorn main:app --host 0.0.0.0 --port 8001 --reload
 ```
 
 Если вы используете `docker-compose`, то запускается вместе со всеми сервисами из `services/docker-compose.yml`.
+
+## 🧩 Auth Service (authentication)
+
+Auth service отвечает за регистрацию пользователей, вход в систему и выдачу JWT-токенов.
+
+- Backend: FastAPI
+- БД: PostgreSQL
+- ORM: SQLAlchemy (sync)
+- Модели: `auth_service/models.py`, `auth_service/schemas.py`
+- Настройки: `auth_service/settings.py` (env через `.env`)
+- Хеширование паролей: `passlib` (bcrypt)
+- JWT: `python-jose`
+
+### Endpoints Auth Service
+
+- `POST /auth/register` - регистрация нового пользователя.
+  - тело: `{ "email": "...", "username": "...", "password": "...", "full_name": "..." }`
+  - ответ: `UserResponse`
+- `POST /auth/login` - вход пользователя.
+  - тело: `{ "username": "...", "password": "..." }`
+  - ответ: `TokenResponse` с `access_token` и `refresh_token`
+- `GET /auth/health` - статус сервиса
+
+### Запуск Auth Service локально
+
+```bash
+cd services/auth_service
+pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port 8002 --reload
+```
+
+Если вы используете `docker-compose`, сервис поднимается вместе со всеми сервисами из `services/docker-compose.yml`.
 
 ## 🧩 Skill Analyzer (skills)
 

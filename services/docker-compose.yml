@@ -4,7 +4,6 @@
 #   * nextjs        — frontend приложение (Next.js)
 #   * skill_analyzer — сервис/ML-пайплайн для извлечения навыков
 #   * job_service   — API для вакансий
-#   * kafka         — брокер сообщений (используется skill_analyzer)
 #   * auth          - сервис авторизации
 #   * gateway       - HTTP gateway сервис
 # Настройки берутся из файла services/.env (см. README.md)

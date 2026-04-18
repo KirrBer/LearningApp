@@ -24,7 +24,6 @@ LearningApp/
 │   │   ├── model_manager.py  # Провайдер моделей(модели подгружаются при запуске сервиса)
 │   │   ├── routes.py         # API endpoints
 │   │   ├── db_methods.py     # Методы работы с БД
-│   │   ├── kafka.py          # kafka producer and consumer
 │   │   ├── utils.py          # Методы обработки данных
 │   │   ├── seed_data.py      # Заполняет БД данными при запуске сервиса
 │   │   ├── tests/            # Unit-тесты с покрытием 74%
@@ -48,6 +47,7 @@ LearningApp/
 │   │   ├── settings.py       # Настройки PostgreSQL и JWT (env)
 │   │   ├── db.py             # ORM, сессии, настройки БД
 │   │   └── requirements.txt  # Зависимости Python
+│   ├── gateway_service/      # в разработке
 │   ├── docker-compose.yml    # Docker Compose конфигурация
 │   └── nginx.conf            # Nginx конфигурация
 └── README.md                  # Этот файл

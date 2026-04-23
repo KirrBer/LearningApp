@@ -20,7 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/auth/register", response_model=schemas.UserResponse)
+@app.post("/register", response_model=schemas.UserResponse)
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     # Check if user exists
     existing_user = db.query(models.User).filter(
@@ -45,7 +45,7 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     
     return db_user
 
-@app.post("/auth/login", response_model=schemas.TokenResponse)
+@app.post("/login", response_model=schemas.TokenResponse)
 def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     # Find user
     db_user = db.query(models.User).filter(
@@ -71,6 +71,54 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
         "refresh_token": refresh_token
     }
 
-@app.get("/auth/health")
+@app.post("/verify", response_model=schemas.TokenValidationResponse)
+def verify_token(token: schemas.TokenResponse, db: Session = Depends(get_db)):
+    """Verify access token validity"""
+    payload = auth.verify_access_token(token.access_token)
+    
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    
+    user_id = payload.get("sub")
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    
+    if not db_user:
+        raise HTTPException(status_code=401, detail="User not found")
+    
+    if not db_user.is_active:
+        raise HTTPException(status_code=401, detail="User is inactive")
+    
+    return {
+        "valid": True,
+        "user_id": user_id,
+        "message": "Token is valid"
+    }
+
+@app.post("/refresh", response_model=schemas.TokenRefreshResponse)
+def refresh_access_token(token_data: schemas.TokenRefresh, db: Session = Depends(get_db)):
+    """Generate new access token using refresh token"""
+    payload = auth.verify_refresh_token(token_data.refresh_token)
+    
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
+    
+    user_id = payload.get("sub")
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    
+    if not db_user:
+        raise HTTPException(status_code=401, detail="User not found")
+    
+    if not db_user.is_active:
+        raise HTTPException(status_code=401, detail="User is inactive")
+    
+    # Create new access token
+    new_access_token = auth.create_access_token(data={"sub": str(db_user.id)})
+    
+    return {
+        "access_token": new_access_token,
+        "token_type": "bearer"
+    }
+
+@app.get("/health")
 def health():
     return {"status": "healthy"}

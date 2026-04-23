@@ -31,3 +31,12 @@ class TokenResponse(BaseModel):
 
 class TokenRefresh(BaseModel):
     refresh_token: str
+
+class TokenValidationResponse(BaseModel):
+    valid: bool
+    user_id: Optional[str] = None
+    message: str
+
+class TokenRefreshResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"

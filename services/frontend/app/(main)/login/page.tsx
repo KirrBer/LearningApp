@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { setAuthTokens } from '@/app/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,8 +33,7 @@ export default function LoginPage() {
         return;
       }
 
-      localStorage.setItem("accessToken", data.access_token);
-      localStorage.setItem("refreshToken", data.refresh_token);
+      setAuthTokens(data.access_token, data.refresh_token);
       router.push("/");
     } catch (err) {
       setError("Серверная ошибка. Повторите попытку позже.");

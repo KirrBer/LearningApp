@@ -1,5 +1,9 @@
-import { notFound } from 'next/navigation';
-import Link from "next/link";
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
+import { authFetch } from '@/app/lib/auth';
 
 interface Vacancy {
     id: number;
@@ -21,53 +25,74 @@ interface VacancyShort {
     area: string | null;
 }
 
+export default function VacancyPage() {
+    const params = useParams();
+    const id = params?.id as string | undefined;
+    const [vacancy, setVacancy] = useState<Vacancy | null>(null);
+    const [similarVacancies, setSimilarVacancies] = useState<VacancyShort[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
-
-async function getVacancy(id: string): Promise<Vacancy> { 
-    const baseUrl = process.env.PUBLIC_URL || 'http://nginx:80';
-    const res = await fetch(`${baseUrl}/api/job_service/vacancies/${id}`, {
-        method: 'GET',
-        cache: 'no-store',
-    });
-
-    if (res.status === 404) {
-        notFound();
-    }
-
-    if (!res.ok) {
-        throw new Error(`Ошибка при загрузке вакансии: ${res.status}`);
-    }
-
-    const data = await res.json();
-    return data as Vacancy;
-}
-
-async function getSimilarVacancies(text: string): Promise<VacancyShort[]> {
-    const baseUrl = 'http://nginx:80';
-    
-    try {
-        const res = await fetch(`${baseUrl}/api/job_service/recommendations_from_text`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ resume: text })
-        });
-        
-        if (!res.ok) {
-            return []; // если ошибка, возвращаем пустой массив
+    useEffect(() => {
+        if (!id) {
+            setError('Вакансия не найдена');
+            setLoading(false);
+            return;
         }
-        
-        return res.json();
-    } catch (error) {
-        console.error('Error fetching similar vacancies:', error);
-        return [];
+
+        setLoading(true);
+        setError('');
+
+        authFetch(`/api/job_service/vacancies/${id}`, {
+            method: 'GET',
+        })
+            .then((res) => {
+                if (res.status === 404) {
+                    throw new Error('notfound');
+                }
+                if (!res.ok) {
+                    throw new Error('Ошибка при загрузке вакансии');
+                }
+                return res.json();
+            })
+            .then((data: Vacancy) => {
+                setVacancy(data);
+                return authFetch('/api/job_service/recommendations_from_text', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ resume: data.description }),
+                });
+            })
+            .then((res) => {
+                if (!res.ok) {
+                    return [];
+                }
+                return res.json();
+            })
+            .then((similar: VacancyShort[]) => {
+                setSimilarVacancies(similar || []);
+            })
+            .catch((err) => {
+                if (err.message === 'notfound') {
+                    setError('Вакансия не найдена');
+                } else {
+                    setError('Не удалось загрузить вакансию');
+                }
+            })
+            .finally(() => setLoading(false));
+    }, [id]);
+
+    if (loading) {
+        return <div className="container mx-auto p-6">Загрузка вакансии...</div>;
     }
-}
 
+    if (error) {
+        return <div className="container mx-auto p-6 text-red-600">{error}</div>;
+    }
 
-export default async function VacancyPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const vacancy = await getVacancy(id);
-    const similarVacancies = await getSimilarVacancies(vacancy.description);
+    if (!vacancy) {
+        return <div className="container mx-auto p-6 text-red-600">Вакансия не найдена</div>;
+    }
 
     return (
         <div>
@@ -92,9 +117,7 @@ export default async function VacancyPage({ params }: { params: Promise<{ id: st
                             <span className="font-medium">Регион:</span> {vacancy.area ?? 'не указан'}
                         </div>
                     </div>
-                    <div dangerouslySetInnerHTML={{ __html: vacancy.description }} />
-
-                    
+                    <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: vacancy.description }} />
                 </div>
             </div>
             {similarVacancies.length > 0 && (
@@ -106,15 +129,12 @@ export default async function VacancyPage({ params }: { params: Promise<{ id: st
                                 <Link
                                     key={similar.id}
                                     href={`/vacancies/${similar.id}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
                                     className="block bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow border border-gray-200 hover:border-blue-300"
                                 >
                                     <h3 className="font-semibold text-lg mb-1 line-clamp-2">
                                         {similar.name}
                                     </h3>
                                     <p className="text-sm text-gray-600 mb-2">{similar.employer}</p>
-                                    
                                     <div className="flex justify-between items-center text-sm">
                                         {similar.salary ? (
                                             <span className="text-green-600 font-medium">
@@ -123,7 +143,6 @@ export default async function VacancyPage({ params }: { params: Promise<{ id: st
                                         ) : (
                                             <span className="text-gray-400">з/п не указана</span>
                                         )}
-                                        
                                         {similar.area && (
                                             <span className="text-gray-500">{similar.area}</span>
                                         )}
@@ -135,5 +154,5 @@ export default async function VacancyPage({ params }: { params: Promise<{ id: st
                 </div>
             )}
         </div>
-    )
+    );
 }

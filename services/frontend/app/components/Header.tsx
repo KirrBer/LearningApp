@@ -2,41 +2,95 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import menu from '@/app/assets/menu.png'
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import menu from '@/app/assets/menu.png';
+import { clearAuthTokens, getAccessToken } from '@/app/lib/auth';
 
 export const Header = () => {
-    const [isOpenedMenu, setIsOpenedMenu] = useState<boolean>(false)
+    const [isOpenedMenu, setIsOpenedMenu] = useState<boolean>(false);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const router = useRouter();
 
-    const handleClick = () =>{
-        setIsOpenedMenu((prevState) => (!prevState))
-    }
+    useEffect(() => {
+        const checkAuth = () => {
+            setIsAuthenticated(Boolean(getAccessToken()));
+        };
 
+        checkAuth();
+        window.addEventListener('storage', checkAuth);
 
-    return <header className="w-full h-14 xl:h-20 z-[100] fixed top-0 left-0 bg-white">
-        <div className="w-full h-full max-w-screen-2xl mx-auto flex items-center justify-between px-2.5">
-            <Link href="/" className="flex items-center h-full shrink-0">
-                <span className="ml-2 text-base xl:text-2xl font-bold text-black">LearningApp</span>
-            </Link>
-            <nav className="w-fit h-full flex gap-2 lg:gap-6 font-medium text-base lg:text-xl items-center leading-none">
-                <Link href={"/"} className="hidden lg:block hover:text-blue-600 transition-colors">Главная</Link>
-                <Link href={"/courses"} className="hidden lg:block hover:text-blue-600 transition-colors">База курсов</Link>
-                <Link href={"/vacancies"} className="hidden lg:block hover:text-blue-600 transition-colors">Вакансии</Link>
-                <Link href={"/learning_path_generator"} className="hidden lg:block hover:text-blue-600 transition-colors">Генератор путей</Link>
-                <Link href={"/skill_analyzer"} className="hidden lg:block hover:text-blue-600 transition-colors">Анализ скилов</Link>
-                <Link href={"/profile"} className="hidden lg:block hover:text-blue-600 transition-colors">Профиль</Link>
-                <Image onClick={handleClick} src={menu} alt='menu' width={40} height={40} className="block lg:hidden h-10 w-10 cursor-pointer"></Image>
-                {
-                isOpenedMenu && <div className="bg-gray-300 w-1/2 h-fit min-h-[50vh] fixed top-14 right-0 flex flex-col text-xl items-left gap-7 pl-8 pt-4">
-                    <Link href={"/"} className="hidden lg:block hover:text-blue-600 transition-colors">Главная</Link>
-                    <Link href={"/courses"} className="hover:text-blue-600 transition-colors">База курсов</Link>
-                    <Link href={"/vacancies"} className="hover:text-blue-600 transition-colors">Вакансии</Link>
-                    <Link href={"/learning_path_generator"} className="lg:block hover:text-blue-600 transition-colors">Генератор путей</Link>
-                    <Link href={"/skill_analyzer"} className="lg:block hover:text-blue-600 transition-colors">Анализ скилов</Link>
-                    <Link href={"/profile"} className="lg:block hover:text-blue-600 transition-colors">Профиль</Link>
-                </div>
-                }
-            </nav>
-        </div>
-    </header>
+        return () => {
+            window.removeEventListener('storage', checkAuth);
+        };
+    }, []);
+
+    const handleLogout = () => {
+        clearAuthTokens();
+        setIsAuthenticated(false);
+        router.push('/login');
+    };
+
+    const handleClick = () => {
+        setIsOpenedMenu((prevState) => !prevState);
+    };
+
+    return (
+        <header className="w-full h-14 xl:h-20 z-[100] fixed top-0 left-0 bg-white shadow-sm">
+            <div className="w-full h-full max-w-screen-2xl mx-auto flex items-center justify-between px-2.5">
+                <Link href="/" className="flex items-center h-full shrink-0">
+                    <span className="ml-2 text-base xl:text-2xl font-bold text-black">LearningApp</span>
+                </Link>
+                <nav className="w-fit h-full flex gap-2 lg:gap-6 font-medium text-base lg:text-xl items-center leading-none">
+                    <Link href={'/'} className="hidden lg:block hover:text-blue-600 transition-colors">Главная</Link>
+                    <Link href={'/courses'} className="hidden lg:block hover:text-blue-600 transition-colors">База курсов</Link>
+                    <Link href={'/vacancies'} className="hidden lg:block hover:text-blue-600 transition-colors">Вакансии</Link>
+                    <Link href={'/learning_path_generator'} className="hidden lg:block hover:text-blue-600 transition-colors">Генератор путей</Link>
+                    <Link href={'/skill_analyzer'} className="hidden lg:block hover:text-blue-600 transition-colors">Анализ скилов</Link>
+                    {isAuthenticated ? (
+                        <>
+                            <Link href={'/profile'} className="hidden lg:block hover:text-blue-600 transition-colors">Профиль</Link>
+                            <button
+                                onClick={handleLogout}
+                                className="hidden lg:inline-flex items-center rounded-lg bg-red-500 px-3 py-2 text-white hover:bg-red-600 transition-colors"
+                            >
+                                Выйти
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <Link href={'/login'} className="hidden lg:block hover:text-blue-600 transition-colors">Войти</Link>
+                            <Link href={'/registration'} className="hidden lg:block hover:text-blue-600 transition-colors">Регистрация</Link>
+                        </>
+                    )}
+                    <Image onClick={handleClick} src={menu} alt='menu' width={40} height={40} className="block lg:hidden h-10 w-10 cursor-pointer" />
+                    {isOpenedMenu && (
+                        <div className="bg-gray-300 w-1/2 h-fit min-h-[50vh] fixed top-14 right-0 flex flex-col text-xl items-left gap-7 pl-8 pt-4">
+                            <Link href={'/'} className="hover:text-blue-600 transition-colors">Главная</Link>
+                            <Link href={'/courses'} className="hover:text-blue-600 transition-colors">База курсов</Link>
+                            <Link href={'/vacancies'} className="hover:text-blue-600 transition-colors">Вакансии</Link>
+                            <Link href={'/learning_path_generator'} className="hover:text-blue-600 transition-colors">Генератор путей</Link>
+                            <Link href={'/skill_analyzer'} className="hover:text-blue-600 transition-colors">Анализ скилов</Link>
+                            {isAuthenticated ? (
+                                <>
+                                    <Link href={'/profile'} className="hover:text-blue-600 transition-colors">Профиль</Link>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="text-left text-red-700 hover:text-red-900"
+                                    >
+                                        Выйти
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link href={'/login'} className="hover:text-blue-600 transition-colors">Войти</Link>
+                                    <Link href={'/registration'} className="hover:text-blue-600 transition-colors">Регистрация</Link>
+                                </>
+                            )}
+                        </div>
+                    )}
+                </nav>
+            </div>
+        </header>
+    );
 }

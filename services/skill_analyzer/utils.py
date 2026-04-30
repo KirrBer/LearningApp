@@ -71,7 +71,7 @@ def extract_skills_from_text(resume: str) -> list[str]:
         def normalize_skills_batch(skills_batch: list[str]) -> list[tuple[str, float]]:
             """Normalize a batch of skills using T5 model."""
             try:
-                texts = ["normalize skill: " + skill for skill in skills_batch]
+                texts = ["приведи к каноническому виду название: " + skill for skill in skills_batch]
                 inputs = tokenizer(
                     texts,
                     return_tensors='pt',
@@ -122,7 +122,7 @@ def extract_skills_from_text(resume: str) -> list[str]:
                 
                 # Фильтруем по порогу уверенности
                 for skill, confidence in batch_results:
-                    if confidence > np.log(0.45):
+                    if confidence > np.log(0.7):  # Порог в лог-пространстве
                         normalized_skills.add(skill)
             except ModelInferenceError:
                 raise

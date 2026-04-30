@@ -4,8 +4,8 @@
 #   * nextjs        — frontend приложение (Next.js)
 #   * skill_analyzer — сервис/ML-пайплайн для извлечения навыков
 #   * job_service   — API для вакансий
-#   * kafka         — брокер сообщений (используется skill_analyzer)
-#
+#   * auth          - сервис авторизации
+#   * gateway       - HTTP gateway сервис
 # Настройки берутся из файла services/.env (см. README.md)
 
 services:
@@ -36,9 +36,6 @@ services:
       PGDATA: ${PGDATA}
       DB_PORT: ${DB_PORT}
       DB_HOST: ${DB_HOST_SA}
-      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
-    ports: 
-      - "8000:8000"
     networks:
       - default
   skill_analyzer_db:
@@ -66,8 +63,6 @@ services:
       PGDATA: ${PGDATA}
       DB_PORT: ${DB_PORT}
       DB_HOST: ${DB_HOST_JS}
-    ports: 
-      - "8001:8000"
     networks:
       - default
   job_service_db:
@@ -84,29 +79,49 @@ services:
     restart: unless-stopped
     networks:
       - default
-  kafka:
-    image: apache/kafka:latest
-    ports:
-      - "9092:9092"
+  auth_service:
+    build: ./auth_service
+    depends_on:
+      - auth_db
     environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_LOG_DIRS: /var/lib/kafka/data
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-    volumes:
-      - kafka-data:/var/lib/kafka/data
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: auth_db
+      DB_HOST: auth_db
+      DB_PORT: ${DB_PORT}
+      SECRET_KEY: ${AUTH_SECRET_KEY}
     networks:
       - default
+    restart: unless-stopped
+
+  auth_db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: auth_db
+    volumes:
+      - auth_pgdata:/var/lib/postgresql
+    ports:
+      - "5434:5432"
+    restart: unless-stopped
+    networks:
+      - default
+
+  gateway_service:
+    build: ./gateway_service
+    ports:
+      - "8003:8000"
+    restart: unless-stopped
+    networks:
+      - default
+
 volumes:
   pgdata_sa:
     driver: local
   pgdata_js:
     driver: local
-  kafka-data:
+  auth_pgdata:
     driver: local
 networks:
   default:

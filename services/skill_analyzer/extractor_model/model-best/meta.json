@@ -1,5 +1,5 @@
 {
-  "lang":"en",
+  "lang":"ru",
   "name":"pipeline",
   "version":"0.0.0",
   "spacy_version":">=3.8.11,<3.9.0",
@@ -46,7 +46,7 @@
         "f":0.7857142857
       }
     },
-    "tok2vec_loss":422.8196910313,
-    "ner_loss":51.8503417969
+    "tok2vec_loss":231.8028999928,
+    "ner_loss":42.4070396423
   }
 }

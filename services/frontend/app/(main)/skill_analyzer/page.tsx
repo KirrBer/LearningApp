@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Vacancies } from '@/app/components/Vacancies';
+import { authFetch } from '@/app/lib/auth';
 
 // Страница Skill Analyzer: позволяет вставить текст резюме или загрузить PDF.
 // Далее отправляет данные в backend и отображает найденные навыки + курсы.
@@ -34,10 +35,10 @@ export default function SkillForm() {
     setShowVacancies(true);
     if (resume){
       try {
-      const response = await fetch('/api/skill_analyzer/extract_skills_from_text', {
+      const response = await authFetch('/api/skill_analyzer/extract_skills_from_text', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: resume })
+        body: JSON.stringify({ text: resume }),
       });
     
       const data = await response.json();
@@ -52,7 +53,7 @@ export default function SkillForm() {
       formData.append('file', file);
 
       try {
-        const response = await fetch('/api/skill_analyzer/extract_skills_from_pdf', {
+        const response = await authFetch('/api/skill_analyzer/extract_skills_from_pdf', {
           method: 'POST',
           body: formData,
         });

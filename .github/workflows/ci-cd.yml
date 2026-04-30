@@ -31,14 +31,6 @@ jobs:
           pip install pytest pytest-cov pytest-asyncio
 
       - name: Run skill_analyzer tests
-        env:
-            POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-            POSTGRES_DB: ${{ secrets.POSTGRES_DB_SA }}
-            POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-            PGDATA: ${{ secrets.PGDATA }}
-            DB_PORT: ${{ secrets.DB_PORT }}
-            DB_HOST: ${{ secrets.DB_HOST_SA }}
-            KAFKA_BOOTSTRAP_SERVERS: ${{ secrets.KAFKA_BOOTSTRAP_SERVERS }}
         working-directory: ./services/skill_analyzer
         run: |
           pytest tests/ -v --cov=./ --cov-report=xml --cov-report=term

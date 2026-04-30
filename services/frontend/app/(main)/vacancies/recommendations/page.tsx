@@ -1,5 +1,3 @@
-'use client';
-
 import { Vacancies } from '@/app/components/Vacancies';
 
 export default function SkillForm() {

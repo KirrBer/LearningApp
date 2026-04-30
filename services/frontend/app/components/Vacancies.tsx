@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { authFetch } from '@/app/lib/auth';
 
 interface Vacancy {
     id: number;
@@ -23,10 +24,10 @@ export function Vacancies({ resume, file }: VacanciesProps) {
     useEffect(() => {
         try {
             if (resume){
-                fetch('/api/job_service/recommendations_from_text', {
+                authFetch('/api/job_service/recommendations_from_text', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ resume: resume })
+                    body: JSON.stringify({ resume: resume }),
                 }).then(res => res.json()).then(data => {
                     setVacancies(data);
                     setLoading(false);
@@ -34,9 +35,9 @@ export function Vacancies({ resume, file }: VacanciesProps) {
             } else if (file){
                 const formData = new FormData();
                 formData.append('file', file);
-                fetch('/api/job_service/recommendations_from_pdf', {
+                authFetch('/api/job_service/recommendations_from_pdf', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
                 }).then(res => res.json()).then(data => {
                     setVacancies(data);
                     setLoading(false);

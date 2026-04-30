@@ -1,13 +1,14 @@
 #!/bin/bash
 
-echo "Waiting for postgres..."
-while ! nc -z auth_db 5432; do
-  sleep 0.1
+
+while ! pg_isready -h ${DB_HOST} -p ${DB_PORT} -U ${POSTGRES_USER} -d ${POSTGRES_DB} -t 5; do
+    echo "🔄 PostgreSQL еще не готов"
+    sleep 3
 done
+
 echo "PostgreSQL started"
 
 echo "Running migrations..."
 alembic upgrade head
 
-echo "Starting auth service..."
-exec uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+exec "$@"

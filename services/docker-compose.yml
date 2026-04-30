@@ -36,8 +36,6 @@ services:
       PGDATA: ${PGDATA}
       DB_PORT: ${DB_PORT}
       DB_HOST: ${DB_HOST_SA}
-    ports: 
-      - "8000:8000"
     networks:
       - default
   skill_analyzer_db:
@@ -65,8 +63,6 @@ services:
       PGDATA: ${PGDATA}
       DB_PORT: ${DB_PORT}
       DB_HOST: ${DB_HOST_JS}
-    ports: 
-      - "8001:8000"
     networks:
       - default
   job_service_db:
@@ -92,9 +88,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: auth_db
       DB_HOST: auth_db
+      DB_PORT: ${DB_PORT}
       SECRET_KEY: ${AUTH_SECRET_KEY}
-    ports:
-      - "8002:8000"
     networks:
       - default
     restart: unless-stopped

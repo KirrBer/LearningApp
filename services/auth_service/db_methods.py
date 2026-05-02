@@ -42,8 +42,7 @@ async def create_user(email: str, username: str, password_hash: str, full_name: 
         full_name=full_name,
     )
     session.add(user)
-    await session.flush()
-    await session.refresh(user)
+    await session.commit()
     return user
 
 
@@ -62,6 +61,5 @@ async def update_user_last_login(user_id: str, session):
 
     user.last_login = datetime.utcnow()
     session.add(user)
-    await session.flush()
-    await session.refresh(user)
+    await session.commit()
     return user

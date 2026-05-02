@@ -12,6 +12,7 @@ class User(Base):
     username = Column(String(100), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
     full_name = Column(String(255))
+    resume = Column(String(10000))
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -40,3 +41,8 @@ class RefreshToken(Base):
     expires_at = Column(DateTime(timezone=True), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     revoked = Column(Boolean, default=False)
+
+class UserSkill(Base):
+    __tablename__ = "user_skills"
+    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    skill = Column(String(100), primary_key=True)

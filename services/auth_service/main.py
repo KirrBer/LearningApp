@@ -1,10 +1,9 @@
 ﻿from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import models
 import schemas
 import auth
-from db import engine
-from db_methods import (
+from auth_service.db import engine
+from auth_service.db_methods import (
     create_user,
     get_existing_user,
     get_user_by_username,
@@ -66,7 +65,7 @@ async def login(user: schemas.UserLogin):
 
 
 @app.post("/verify", response_model=schemas.TokenValidationResponse)
-async def verify_token(token: schemas.TokenResponse):
+async def verify_token(token: schemas.TokenVerify):
     payload = auth.verify_access_token(token.access_token)
 
     if not payload:

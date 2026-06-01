@@ -12,8 +12,8 @@ from skill_analyzer.routes import router
 from skill_analyzer.model_manager import model_manager
 from contextlib import asynccontextmanager
 import logging
-from skill_analyzer.threadpool import threadpool_manager
-from skill_analyzer.exceptions import ModelLoadingError, ThreadPoolError
+from skill_analyzer.threadpool import process_pool_manager
+from skill_analyzer.exceptions import ModelLoadingError, ProcessPoolError
 
 logging.basicConfig(
     level=logging.INFO,
@@ -37,15 +37,15 @@ async def lifespan(app: FastAPI):
     # Запускаем Kafka producer/consumer.
 
 
-    # Создаем threadpool
+    # Создаем пул процессов для CPU-bound ML inference
     try:
-        threadpool_manager.create()
-        logger.info("✅ Threadpool created successfully")
-    except ThreadPoolError as e:
-        logger.error(f"❌ Failed to create threadpool: {str(e)}")
+        process_pool_manager.create()
+        logger.info("✅ Process pool created successfully")
+    except ProcessPoolError as e:
+        logger.error(f"❌ Failed to create process pool: {str(e)}")
         raise
     except Exception as e:
-        logger.error(f"❌ Unexpected error during threadpool creation: {str(e)}")
+        logger.error(f"❌ Unexpected error during process pool creation: {str(e)}")
         raise
 
     yield
@@ -58,10 +58,10 @@ async def lifespan(app: FastAPI):
         logger.error(f"❌ Error unloading models: {str(e)}")
 
     try:
-        threadpool_manager.stop()
-        logger.info("✅ Threadpool stopped successfully")
+        process_pool_manager.stop()
+        logger.info("✅ Process pool stopped successfully")
     except Exception as e:
-        logger.error(f"❌ Error stopping threadpool: {str(e)}")
+        logger.error(f"❌ Error stopping process pool: {str(e)}")
  
 app = FastAPI(lifespan=lifespan)
 

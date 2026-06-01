@@ -9,15 +9,12 @@ from alembic import context
 import sys
 from pathlib import Path
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from auth_service.db import Base, DATABASE_URL
-from auth_service.models import User, Role, UserRole, RefreshToken
+from auth_service.models import User, Role, UserRole, RefreshToken, UserSkill
+from auth_service.db import DATABASE_URL, Base
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
+
 config = context.config
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
@@ -25,6 +22,7 @@ config.set_main_option("sqlalchemy.url", DATABASE_URL)
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+
 
 # add your model's MetaData object here
 # for 'autogenerate' support

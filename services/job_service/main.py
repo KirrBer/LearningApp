@@ -11,7 +11,7 @@ from job_service.routes import router
 import logging
 import traceback
 from contextlib import asynccontextmanager
-from job_service.threadpool import threadpool_manager
+from job_service.threadpool import process_pool_manager
 
 # Настройка логирования
 logging.basicConfig(
@@ -24,11 +24,11 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
-    threadpool_manager.create()
+    process_pool_manager.create()
 
     yield
 
-    await threadpool_manager.stop()
+    await process_pool_manager.stop()
 
 app = FastAPI(
     title="Job Service",

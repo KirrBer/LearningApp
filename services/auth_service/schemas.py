@@ -40,3 +40,6 @@ class TokenValidationResponse(BaseModel):
 class TokenRefreshResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+class TokenVerify(BaseModel):
+    access_token: str

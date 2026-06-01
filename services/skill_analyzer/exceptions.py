@@ -33,6 +33,6 @@ class DatabaseQueryError(DatabaseError):
     pass
 
 
-class ThreadPoolError(SkillAnalyzerException):
-    """Raised when threadpool operations fail."""
+class ProcessPoolError(SkillAnalyzerException):
+    """Raised when process pool operations fail."""
     pass

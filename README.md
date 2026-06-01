@@ -47,7 +47,10 @@ LearningApp/
 │   │   ├── settings.py       # Настройки PostgreSQL и JWT (env)
 │   │   ├── db.py             # ORM, сессии, настройки БД
 │   │   └── requirements.txt  # Зависимости Python
-│   ├── gateway_service/      # в разработке
+│   ├── gateway_service/      # Сервис шлюза: маршрутизация, авторизация, прокси
+│   │   ├── main.py           # Прокси и мидлвар для проверки токена
+│   │   ├── settings.py       # Адреса внутренних сервисов
+│   │   └── Dockerfile        # Конфигурация контейнера шлюза
 │   ├── docker-compose.yml    # Docker Compose конфигурация
 │   └── nginx.conf            # Nginx конфигурация
 └── README.md                  # Этот файл
@@ -144,7 +147,7 @@ uvicorn main:app --host 0.0.0.0 --port 8001 --reload
 
 ## 🧩 Auth Service (authentication)
 
-Auth service отвечает за регистрацию пользователей, вход в систему и выдачу JWT-токенов.
+Auth service отвечает за регистрацию пользователей, вход в систему, выдачу JWT-токенов и валидацию токенов для gateway.
 
 - Backend: FastAPI
 - БД: PostgreSQL
@@ -156,13 +159,19 @@ Auth service отвечает за регистрацию пользовател
 
 ### Endpoints Auth Service
 
-- `POST /auth/register` - регистрация нового пользователя.
+- `POST /register` - регистрация нового пользователя.
   - тело: `{ "email": "...", "username": "...", "password": "...", "full_name": "..." }`
   - ответ: `UserResponse`
-- `POST /auth/login` - вход пользователя.
+- `POST /login` - вход пользователя.
   - тело: `{ "username": "...", "password": "..." }`
   - ответ: `TokenResponse` с `access_token` и `refresh_token`
-- `GET /auth/health` - статус сервиса
+- `POST /verify` - проверка валидности `access_token`.
+  - тело: `{ "access_token": "..." }`
+  - ответ: `TokenValidationResponse`
+- `POST /refresh` - генерация нового access token по refresh token.
+  - тело: `{ "refresh_token": "..." }`
+  - ответ: `TokenRefreshResponse`
+- `GET /health` - статус сервиса
 
 ### Запуск Auth Service локально
 
@@ -170,6 +179,42 @@ Auth service отвечает за регистрацию пользовател
 cd services/auth_service
 pip install -r requirements.txt
 uvicorn main:app --host 0.0.0.0 --port 8002 --reload
+```
+
+Если вы используете `docker-compose`, сервис поднимается вместе со всеми сервисами из `services/docker-compose.yml`.
+
+## 🧩 Gateway Service (proxy)
+
+Gateway service выступает единым HTTP-подходом к микросервисам, проксирует запросы и проверяет JWT перед доступом к внутренним API.
+
+- Backend: FastAPI
+- Proxy: `httpx.AsyncClient`
+- Авторизация: проверка `Bearer` токена через `auth_service`
+- Настройки: `gateway_service/settings.py`
+- Основная логика: `gateway_service/main.py`
+
+### Как работает Gateway
+
+- Маршрутизирует запросы на сервисы по префиксам:
+  - `api/auth/*` → `auth_service`
+  - `api/job_service/*` → `job_service`
+  - `api/skill_analyzer/*` → `skill_analyzer`
+- Проверяет токен для защищённых маршрутов через `POST /verify` в `auth_service`
+- Скидывает заголовки `Host`, `Content-Length` и перенаправляет тело запроса в целевой сервис
+
+### Endpoints Gateway Service
+
+- `GET /api/health` - статус gateway и состояния всех внутренних сервисов
+- `ANY /api/auth/*` - прокси для auth_service
+- `ANY /api/job_service/*` - прокси для job_service
+- `ANY /api/skill_analyzer/*` - прокси для skill_analyzer
+
+### Запуск Gateway Service локально
+
+```bash
+cd services/gateway_service
+pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 Если вы используете `docker-compose`, сервис поднимается вместе со всеми сервисами из `services/docker-compose.yml`.
@@ -199,7 +244,7 @@ Skill analyzer отвечает за извлечение навыков из т
 ```bash
 cd services/skill_analyzer
 pip install -r requirements.txt
-uvicorn main:app --host 0.0.0.0 --port 8002 --reload
+uvicorn skill_analyzer.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 Если используете `docker-compose`, сервис поднимается вместе со всеми сервисами (см. `services/docker-compose.yml`).

@@ -8,11 +8,12 @@ from fastapi import APIRouter, Body, File, UploadFile, HTTPException, status
 from skill_analyzer.utils import extract_skills_from_text, extract_text_from_pdf, find_courses
 from skill_analyzer.schemas import TextRequest, SkillResponse
 from typing import List
-from skill_analyzer.threadpool import threadpool_manager
+from skill_analyzer.threadpool import process_pool_manager
 from skill_analyzer.exceptions import (
     PDFExtractionError, 
     ModelInferenceError, 
-    DatabaseError
+    DatabaseError,
+    ProcessPoolError
 )
 import logging
 
@@ -31,10 +32,10 @@ async def get_skills(data: TextRequest = Body(...)) -> List[SkillResponse]:
                 detail="Text cannot be empty"
             )
 
-        # Нормализация и извлечение навыков выполняется в отдельном потоке,
-        # чтобы не блокировать основной event loop.
+        # Извлечение навыков выполняется в отдельном процессе для обхода GIL,
+        # обеспечивая истинный параллелизм для CPU-bound ML inference.
         try:
-            skills = await threadpool_manager.run_in_custom_threadpool(extract_skills_from_text, data.text)
+            skills = await process_pool_manager.run_in_process_pool(extract_skills_from_text, data.text)
         except ModelInferenceError as e:
             logger.error(f"Model inference error: {str(e)}")
             raise HTTPException(
@@ -126,7 +127,7 @@ async def get_skills_from_pdf(file: UploadFile = File(...)) -> List[SkillRespons
             )
 
         try:
-            skills = await threadpool_manager.run_in_custom_threadpool(extract_skills_from_text, text)
+            skills = await process_pool_manager.run_in_process_pool(extract_skills_from_text, text)
         except ModelInferenceError as e:
             logger.error(f"Model inference error: {str(e)}")
             raise HTTPException(

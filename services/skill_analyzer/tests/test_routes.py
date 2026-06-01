@@ -8,13 +8,13 @@ from skill_analyzer.exceptions import ModelInferenceError, PDFExtractionError, D
 def patch_dependencies(monkeypatch):
     # prevent heavy model loading
     from skill_analyzer.model_manager import model_manager
-    from skill_analyzer.threadpool import threadpool_manager
+    from skill_analyzer.threadpool import process_pool_manager
 
     monkeypatch.setattr(model_manager, "load_models", lambda: None)
     monkeypatch.setattr(model_manager, "unload_models", lambda: None)
 
-    # Initialize threadpool_manager for testing
-    threadpool_manager.create()
+    # Initialize process_pool_manager for testing
+    process_pool_manager.create()
 
     monkeypatch.setattr("skill_analyzer.routes.extract_skills_from_text", lambda text: ["x"])
     

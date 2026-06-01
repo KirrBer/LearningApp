@@ -6,10 +6,10 @@ from job_service.main import app
 @pytest.fixture(autouse=True)
 def patch_job_service_deps(monkeypatch):
     # Избежим создания реального ThreadPool для unit-тестов
-    from job_service.threadpool import threadpool_manager
+    from job_service.threadpool import process_pool_manager
 
-    monkeypatch.setattr(threadpool_manager, "create", lambda: None)
-    monkeypatch.setattr(threadpool_manager, "stop", lambda: None)
+    monkeypatch.setattr(process_pool_manager, "create", lambda: None)
+    monkeypatch.setattr(process_pool_manager, "stop", lambda: None)
 
     # Заглушка для get_vacancy_by_id
     async def fake_get_vacancy_by_id(vacancy_id):

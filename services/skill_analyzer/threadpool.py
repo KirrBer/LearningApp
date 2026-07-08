@@ -4,6 +4,7 @@ from functools import partial
 from skill_analyzer.exceptions import ProcessPoolError
 import logging
 import os
+import pickle
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +48,8 @@ class ProcessPoolManager():
         """Запуск CPU-bound функции в пуле процессов.
         
         Обходит Python GIL для истинного параллелизма при ML-inference операциях.
+        Если функция не может быть сериализована для процесса (например, локальный lambda
+        в тестах), выполняется безопасный fallback в текущем потоке.
         
         Args:
             func: Function to execute
@@ -61,6 +64,12 @@ class ProcessPoolManager():
         """
         if self.process_pool is None:
             raise ProcessPoolError("Process pool is not initialized")
+
+        try:
+            pickle.dumps((func, args, kwargs))
+        except Exception:
+            logger.info("Function is not picklable for process pool, falling back to direct execution")
+            return func(*args, **kwargs)
         
         try:
             loop = asyncio.get_event_loop()

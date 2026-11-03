@@ -44,7 +44,10 @@ def test_post_pdf():
         files={"file": ("resume.pdf", b"data", "application/pdf")},
     )
     assert resp.status_code == 200
-    assert resp.json() == [{"name": "x", "course": None}]
+    assert resp.json() == {
+        "resume_text": "some text",
+        "skills": [{"name": "x", "course": None}],
+    }
 
 
 # Exception handling tests

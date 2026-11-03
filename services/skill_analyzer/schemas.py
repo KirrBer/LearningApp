@@ -5,3 +5,7 @@ class TextRequest(BaseModel):
 class SkillResponse(BaseModel):
     name: str
     course: str | None
+
+class PDFAnalysisResponse(BaseModel):
+    resume_text: str
+    skills: list[SkillResponse]

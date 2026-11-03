@@ -6,7 +6,7 @@
 
 from fastapi import APIRouter, Body, File, UploadFile, HTTPException, status
 from skill_analyzer.utils import extract_skills_from_text, extract_text_from_pdf, find_courses
-from skill_analyzer.schemas import TextRequest, SkillResponse
+from skill_analyzer.schemas import TextRequest, SkillResponse, PDFAnalysisResponse
 from typing import List
 from skill_analyzer.threadpool import process_pool_manager
 from skill_analyzer.exceptions import (
@@ -77,9 +77,9 @@ async def get_skills(data: TextRequest = Body(...)) -> List[SkillResponse]:
         )
 
 
-@router.post("/extract_skills_from_pdf", summary="Получить список навыков из полученного pdf")
-async def get_skills_from_pdf(file: UploadFile = File(...)) -> List[SkillResponse]:
-    """Принимает PDF, извлекает из него текст и возвращает навыки + курсы."""
+@router.post("/extract_skills_from_pdf", summary="Получить текст резюме и навыки из PDF")
+async def get_skills_from_pdf(file: UploadFile = File(...)) -> PDFAnalysisResponse:
+    """Принимает PDF и возвращает извлечённый текст, навыки и курсы."""
     
     try:
         if not file:
@@ -143,7 +143,6 @@ async def get_skills_from_pdf(file: UploadFile = File(...)) -> List[SkillRespons
 
         if not skills:
             logger.warning("No skills found in the provided PDF")
-            return []
 
         try:
             response = await find_courses(skills)
@@ -154,7 +153,7 @@ async def get_skills_from_pdf(file: UploadFile = File(...)) -> List[SkillRespons
             logger.error(f"Unexpected error during course lookup: {str(e)}")
             response = [{"name": skill, "course": None} for skill in skills]
 
-        return response
+        return {"resume_text": text, "skills": response}
     
     except HTTPException:
         raise

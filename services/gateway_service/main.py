@@ -47,9 +47,15 @@ def build_target_url(path: str) -> str | None:
 def needs_authorization(path: str) -> bool:
     if path in UNPROTECTED_PATHS:
         return False
+    if path.startswith("api/auth/"):
+        return True
     if path.startswith("auth/"):
         return True
+    if path.startswith("api/job_service/"):
+        return True
     if path.startswith("job_service/"):
+        return True
+    if path.startswith("api/skill_analyzer/"):
         return True
     if path.startswith("skill_analyzer/"):
         return True

@@ -24,6 +24,32 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class ResumeUpdateRequest(BaseModel):
+    resume: Optional[str] = None
+
+class ProfileUpdateRequest(BaseModel):
+    email: EmailStr
+    username: str
+    full_name: Optional[str] = None
+
+class UserProfileResponse(BaseModel):
+    id: UUID
+    email: str
+    username: str
+    full_name: Optional[str]
+    resume: Optional[str] = None
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SkillsUpdateRequest(BaseModel):
+    skills: list[str]
+
+class UserSkillsResponse(BaseModel):
+    skills: list[str]
+
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str

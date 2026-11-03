@@ -3,12 +3,24 @@
 import { useEffect, useState } from 'react';
 import { Vacancies } from '@/app/components/Vacancies';
 import { authFetch } from '@/app/lib/auth';
-import { getSavedResumeText, saveResumeText } from '@/app/lib/resume';
+import {
+  getSavedResumeText,
+  getSavedSkills,
+  loadResumeFromProfile,
+  loadSkillsFromProfile,
+  saveResumeText,
+  saveResumeToProfile,
+  saveSkills,
+  saveSkillsToProfile,
+} from '@/app/lib/resume';
 
 // Страница Skill Analyzer: позволяет вставить текст резюме или загрузить PDF.
 // Далее отправляет данные в backend и отображает найденные навыки + курсы.
 export default function SkillForm() {
-  interface Skill { name: string; course: string; }
+  interface Skill {
+    name: string;
+    course?: string | null;
+  }
 
   const [resume, setResume] = useState<string>('');
   const [skills, setSkills] = useState<Array<Skill>>([]);
@@ -17,18 +29,38 @@ export default function SkillForm() {
   const [showVacancies, setShowVacancies] = useState<boolean>(false);
 
   useEffect(() => {
-    const savedResume = getSavedResumeText();
-    if (savedResume) {
-      setResume(savedResume);
-    }
+    const hydrateProfile = async () => {
+      const savedResume = await loadResumeFromProfile();
+      if (savedResume) {
+        setResume(savedResume);
+      }
+
+      const savedSkills = await loadSkillsFromProfile();
+      if (savedSkills.length > 0) {
+        setSkills(savedSkills);
+      }
+
+      const localResume = getSavedResumeText();
+      if (!savedResume && localResume) {
+        setResume(localResume);
+      }
+
+      const localSkills = getSavedSkills();
+      if (savedSkills.length === 0 && localSkills.length > 0) {
+        setSkills(localSkills);
+      }
+    };
+
+    hydrateProfile();
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
-      setResume('');
-      saveResumeText('');
       setSkills([]);
+      saveSkills([]);
+      void saveSkillsToProfile([]);
+      setShowVacancies(false);
     }
   };
 
@@ -37,6 +69,8 @@ export default function SkillForm() {
     const fileInput = document.getElementById('pdf-upload') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
     setSkills([]);
+    saveSkills([]);
+    void saveSkillsToProfile([]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,6 +80,7 @@ export default function SkillForm() {
 
     if (resume) {
       saveResumeText(resume);
+      await saveResumeToProfile(resume);
       try {
         const response = await authFetch('/api/skill_analyzer/extract_skills_from_text', {
           method: 'POST',
@@ -54,7 +89,10 @@ export default function SkillForm() {
         });
 
         const data = await response.json();
-        setSkills(data || []);
+        const nextSkills = data || [];
+        setSkills(nextSkills);
+        saveSkills(nextSkills);
+        await saveSkillsToProfile(nextSkills);
       } catch (error) {
         console.error('Error:', error);
       }
@@ -68,7 +106,18 @@ export default function SkillForm() {
           body: formData,
         });
         const data = await response.json();
-        setSkills(data || []);
+        if (!response.ok) {
+          throw new Error(data.detail || 'Не удалось обработать PDF');
+        }
+
+        const extractedResume = typeof data.resume_text === 'string' ? data.resume_text : '';
+        const nextSkills = Array.isArray(data.skills) ? data.skills : [];
+        setResume(extractedResume);
+        saveResumeText(extractedResume);
+        await saveResumeToProfile(extractedResume);
+        setSkills(nextSkills);
+        saveSkills(nextSkills);
+        await saveSkillsToProfile(nextSkills);
       } catch (error) {
         console.error('Error:', error);
       }
@@ -86,7 +135,10 @@ export default function SkillForm() {
               const nextValue = e.target.value;
               setResume(nextValue);
               saveResumeText(nextValue);
+              void saveResumeToProfile(nextValue);
               setSkills([]);
+              saveSkills([]);
+              void saveSkillsToProfile([]);
               setShowVacancies(false);
             }}
             placeholder="Вставьте текст резюме..."
@@ -158,8 +210,7 @@ export default function SkillForm() {
         </div>
       )}
 
-      {showVacancies && resume && <Vacancies resume={resume} file={null} />}
-      {showVacancies && file && <Vacancies file={file} resume={null} />}
+      {showVacancies && (resume ? <Vacancies resume={resume} file={null} /> : file ? <Vacancies file={file} resume={null} /> : null)}
     </div>
   );
 }

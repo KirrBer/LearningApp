@@ -1,6 +1,5 @@
 import requests
 
-# Константа с User-Agent (вынесите в начало файла)
 HEADERS = {
     'User-Agent': 'LearningApp/1.0 (operax0@yandex.ru)',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
@@ -17,7 +16,7 @@ def get_vacancies_id(page=0):
         'per_page': 100,
         'page': page
     }
-    response = requests.get(url, params=params, headers=HEADERS)  # Добавлен headers
+    response = requests.get(url, params=params, headers=HEADERS) 
     if response.status_code == 200:
         result = [item['id'] for item in response.json().get('items', [])]
         return result
@@ -27,7 +26,7 @@ def get_vacancies_id(page=0):
 
 def get_vacancy(id):
     url = f'https://api.hh.ru/vacancies/{id}'
-    response = requests.get(url, headers=HEADERS)  # Добавлен headers
+    response = requests.get(url, headers=HEADERS)  
     if response.status_code == 200:
         data = response.json()
         return {

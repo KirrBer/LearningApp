@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Vacancies } from '@/app/components/Vacancies';
 import { authFetch } from '@/app/lib/auth';
+import { getSavedResumeText, saveResumeText } from '@/app/lib/resume';
 
 // Страница Skill Analyzer: позволяет вставить текст резюме или загрузить PDF.
 // Далее отправляет данные в backend и отображает найденные навыки + курсы.
@@ -15,40 +16,49 @@ export default function SkillForm() {
   const [file, setFile] = useState<File | null>(null);
   const [showVacancies, setShowVacancies] = useState<boolean>(false);
 
+  useEffect(() => {
+    const savedResume = getSavedResumeText();
+    if (savedResume) {
+      setResume(savedResume);
+    }
+  }, []);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
-      setResume('')
-      setSkills([])
+      setResume('');
+      saveResumeText('');
+      setSkills([]);
     }
   };
+
   const handleRemoveFile = () => {
     setFile(null);
     const fileInput = document.getElementById('pdf-upload') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
-    setSkills([])
+    setSkills([]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setShowVacancies(true);
-    if (resume){
-      try {
-      const response = await authFetch('/api/skill_analyzer/extract_skills_from_text', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: resume }),
-      });
-    
-      const data = await response.json();
-      setSkills(data || []);
 
-    
+    if (resume) {
+      saveResumeText(resume);
+      try {
+        const response = await authFetch('/api/skill_analyzer/extract_skills_from_text', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: resume }),
+        });
+
+        const data = await response.json();
+        setSkills(data || []);
       } catch (error) {
         console.error('Error:', error);
       }
-    } else if (file){
+    } else if (file) {
       const formData = new FormData();
       formData.append('file', file);
 
@@ -62,44 +72,41 @@ export default function SkillForm() {
       } catch (error) {
         console.error('Error:', error);
       }
-    } 
+    }
     setLoading(false);
-  }
-  
-    
+  };
 
   return (
     <div className="max-w-2xl mx-auto p-6">
       <form onSubmit={handleSubmit} className="space-y-4">
         {!file && (
-        <textarea
-          value={resume}
-          onChange={(e) => {
-            setResume(e.target.value)
-            setSkills([])
-            setShowVacancies(false)
-            }
-          }
-          placeholder="Вставьте текст резюме..."
-          className="w-full h-64 p-4 border rounded-lg focus:ring-2 focus:ring-blue-500"
-        />
+          <textarea
+            value={resume}
+            onChange={(e) => {
+              const nextValue = e.target.value;
+              setResume(nextValue);
+              saveResumeText(nextValue);
+              setSkills([]);
+              setShowVacancies(false);
+            }}
+            placeholder="Вставьте текст резюме..."
+            className="w-full h-64 p-4 border rounded-lg focus:ring-2 focus:ring-blue-500"
+          />
         )}
+
         <input
-        id="pdf-upload"
-        accept=".pdf"
-        type="file"
-        onChange={handleFileChange}
-        className="block w-full mb-4 text-sm text-gray-500
-          file:mr-4 file:py-2 file:px-4
-          file:rounded-full file:border-0
-          file:text-sm file:font-semibold
-          file:bg-blue-50 file:text-blue-700
-          hover:file:bg-blue-100"
+          id="pdf-upload"
+          accept=".pdf"
+          type="file"
+          onChange={handleFileChange}
+          className="block w-full mb-4 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
         />
+
         {file && (
           <div className="mt-2 flex items-center justify-between bg-gray-50 p-2 rounded">
             <span className="text-sm truncate">{file.name}</span>
             <button
+              type="button"
               onClick={handleRemoveFile}
               className="text-red-500 hover:text-red-700 text-sm font-medium"
             >
@@ -107,6 +114,7 @@ export default function SkillForm() {
             </button>
           </div>
         )}
+
         <button
           type="submit"
           disabled={loading}
@@ -115,6 +123,7 @@ export default function SkillForm() {
           {loading ? 'Извлечение...' : 'Извлечь навыки'}
         </button>
       </form>
+
       {!file && !resume && (
         <p className="mb-4 text-sm text-gray-600">
           Пожалуйста прикрепите файл или введите текст резюме
@@ -125,29 +134,30 @@ export default function SkillForm() {
         <div className="mt-6">
           <h3 className="text-lg font-semibold mb-3">Навыки:</h3>
           <div className="flex flex-wrap gap-2">
-            {skills.map((skill, i) => 
-            skill.course ? (
-              <a
-                key={i}
-                className="bg-red-300 px-3 py-1 rounded-full text-sm"
-                href={skill.course}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {skill.name}
-              </a>
-            ) : (
-            <span
-              key={i}
-              className="bg-gray-100 px-3 py-1 rounded-full text-sm"
-            >
-              {skill.name}
-            </span>
-            )
-          )}
+            {skills.map((skill, i) =>
+              skill.course ? (
+                <a
+                  key={i}
+                  className="bg-red-300 px-3 py-1 rounded-full text-sm"
+                  href={skill.course}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {skill.name}
+                </a>
+              ) : (
+                <span
+                  key={i}
+                  className="bg-gray-100 px-3 py-1 rounded-full text-sm"
+                >
+                  {skill.name}
+                </span>
+              )
+            )}
           </div>
         </div>
       )}
+
       {showVacancies && resume && <Vacancies resume={resume} file={null} />}
       {showVacancies && file && <Vacancies file={file} resume={null} />}
     </div>
